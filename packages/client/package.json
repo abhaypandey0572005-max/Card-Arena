@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "npm run build --workspace=@card-battler/shared || (cd ../shared && tsc)",
     "build": "tsc && vite build",
     "preview": "vite preview"
   },
