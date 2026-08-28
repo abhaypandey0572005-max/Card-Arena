@@ -35,8 +35,9 @@ export function useGameSocket() {
   // Connect to WebSocket
   useEffect(() => {
     let wsUrl = '';
-    const envWsUrl = import.meta.env.VITE_WS_URL;
-    const envServerUrl = import.meta.env.VITE_SERVER_URL;
+    const metaEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env || {};
+    const envWsUrl = metaEnv.VITE_WS_URL;
+    const envServerUrl = metaEnv.VITE_SERVER_URL;
 
     if (envWsUrl) {
       wsUrl = envWsUrl;
