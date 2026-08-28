@@ -11,7 +11,8 @@ import {
   Sparkles, 
   Flame, 
   ShieldCheck,
-  Swords 
+  Swords,
+  Crown
 } from 'lucide-react';
 
 interface LandingHeroProps {
@@ -19,6 +20,7 @@ interface LandingHeroProps {
   onPlayVsAi: () => void;
   onPlayWithFriends: () => void;
   onOpenDeckStudio: () => void;
+  onOpenFounder?: () => void;
 }
 
 export const LandingHero: React.FC<LandingHeroProps> = ({
@@ -26,6 +28,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
   onPlayVsAi,
   onPlayWithFriends,
   onOpenDeckStudio,
+  onOpenFounder,
 }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -46,7 +49,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
   ];
 
   return (
-    <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-between px-4 py-8 overflow-hidden z-10">
+    <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-between px-4 py-6 overflow-hidden z-10">
       {/* Top Ticker: Live Players Online */}
       <div className="flex items-center gap-3 px-4 py-1.5 rounded-full glass-panel border border-arena-cyan/30 shadow-lg shadow-arena-cyan/10 animate-fade-in">
         <div className="relative flex items-center justify-center">
@@ -162,23 +165,42 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
         </div>
       </div>
 
-      {/* Bottom Features Banner */}
-      <div className="w-full max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-slate-800/60 z-10 text-xs">
-        <div className="flex items-center gap-2.5 p-3 rounded-xl glass-panel">
-          <ShieldCheck className="w-4 h-4 text-arena-cyan shrink-0" />
-          <span className="font-bold text-slate-300">Play Solo vs AI or Real-Time PvP</span>
+      {/* Bottom Features Banner & Founder Credit */}
+      <div className="w-full max-w-6xl flex flex-col gap-3 pt-4 border-t border-slate-800/60 z-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          <div className="flex items-center gap-2 p-2.5 rounded-xl glass-panel">
+            <ShieldCheck className="w-4 h-4 text-arena-cyan shrink-0" />
+            <span className="font-bold text-slate-300">Play Solo vs AI or Real-Time PvP</span>
+          </div>
+          <div className="flex items-center gap-2 p-2.5 rounded-xl glass-panel">
+            <Users className="w-4 h-4 text-arena-blue shrink-0" />
+            <span className="font-bold text-slate-300">1-Click Shareable Friend Invite Links</span>
+          </div>
+          <div className="flex items-center gap-2 p-2.5 rounded-xl glass-panel">
+            <Swords className="w-4 h-4 text-arena-gold shrink-0" />
+            <span className="font-bold text-slate-300">Marvel • DC • Pokemon • WWE • Anime</span>
+          </div>
+          <div className="flex items-center gap-2 p-2.5 rounded-xl glass-panel">
+            <Flame className="w-4 h-4 text-orange-400 shrink-0" />
+            <span className="font-bold text-slate-300">Authoritative Full-Duplex WebSockets</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2.5 p-3 rounded-xl glass-panel">
-          <Users className="w-4 h-4 text-arena-blue shrink-0" />
-          <span className="font-bold text-slate-300">1-Click Shareable Friend Invite Links</span>
-        </div>
-        <div className="flex items-center gap-2.5 p-3 rounded-xl glass-panel">
-          <Swords className="w-4 h-4 text-arena-gold shrink-0" />
-          <span className="font-bold text-slate-300">Marvel • DC • Pokemon • WWE • Anime</span>
-        </div>
-        <div className="flex items-center gap-2.5 p-3 rounded-xl glass-panel">
-          <Flame className="w-4 h-4 text-orange-400 shrink-0" />
-          <span className="font-bold text-slate-300">Authoritative Full-Duplex WebSockets</span>
+
+        {/* Founder Credit Line */}
+        <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 px-1">
+          <span>⚔️ CARD ARENA v1.0.0</span>
+          {onOpenFounder && (
+            <button
+              onClick={() => {
+                soundFX.playCardHover();
+                onOpenFounder();
+              }}
+              className="flex items-center gap-1.5 text-arena-gold hover:text-white transition font-black uppercase tracking-wider px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-400/30"
+            >
+              <Crown className="w-3.5 h-3.5" />
+              Founder: Abhay Pandey
+            </button>
+          )}
         </div>
       </div>
     </div>

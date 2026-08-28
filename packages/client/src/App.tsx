@@ -5,6 +5,7 @@ import { LandingHero } from './components/LandingHero.js';
 import { DeckStudio } from './components/DeckStudio.js';
 import { CustomDeckBuilder } from './components/CustomDeckBuilder.js';
 import { LeaderboardModal } from './components/LeaderboardModal.js';
+import { FounderModal } from './components/FounderModal.js';
 import { Lobby } from './components/Lobby.js';
 import { MatchmakingRadar } from './components/MatchmakingRadar.js';
 import { FriendRoomModal } from './components/FriendRoomModal.js';
@@ -12,7 +13,6 @@ import { Battlefield } from './components/Battlefield.js';
 import { GameOverModal } from './components/GameOverModal.js';
 import { soundFX } from './utils/audio.js';
 import { loadPlayerStats, PlayerStats } from './utils/ranks.js';
-import { loadAllDecks } from './utils/customDecks.js';
 import { 
   Sun, 
   Moon, 
@@ -25,7 +25,7 @@ import {
   Users,
   Trophy,
   Sparkles,
-  Layers
+  Crown
 } from 'lucide-react';
 import { PRESET_DECKS } from '@card-battler/shared';
 
@@ -45,6 +45,7 @@ export const App: React.FC = () => {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showFriendModal, setShowFriendModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showFounder, setShowFounder] = useState(false);
   const [initialUrlRoomCode, setInitialUrlRoomCode] = useState<string>('');
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => loadPlayerStats(currentPlayerName));
 
@@ -211,6 +212,21 @@ export const App: React.FC = () => {
 
         {/* Right Controls */}
         <div className="flex items-center gap-2">
+          {/* Founder Button */}
+          <button
+            onClick={() => {
+              soundFX.playCardHover();
+              setShowFounder(true);
+            }}
+            className="p-2 rounded-xl glass-panel text-arena-gold hover:text-white border border-amber-500/40 hover:border-arena-gold transition flex items-center gap-1.5 bg-amber-500/10"
+            title="Founder Profile — Abhay Pandey"
+          >
+            <Crown className="w-4 h-4 text-arena-gold" />
+            <span className="text-xs font-black uppercase tracking-wider hidden xl:inline">
+              Founder
+            </span>
+          </button>
+
           {/* Leaderboard Button */}
           <button
             onClick={() => {
@@ -323,9 +339,15 @@ export const App: React.FC = () => {
             onPlayVsAi={handlePlayVsAi}
             onPlayWithFriends={() => setShowFriendModal(true)}
             onOpenDeckStudio={() => setViewMode('custom-decks')}
+            onOpenFounder={() => setShowFounder(true)}
           />
         )}
       </main>
+
+      {/* Founder Modal */}
+      {showFounder && (
+        <FounderModal onClose={() => setShowFounder(false)} />
+      )}
 
       {/* Leaderboard Modal */}
       {showLeaderboard && (
