@@ -91,7 +91,7 @@ export const FounderModal: React.FC<FounderModalProps> = ({ onClose }) => {
         {/* Connect & Social Buttons */}
         <div className="relative z-10 flex flex-wrap items-center gap-3 pt-3 border-t border-slate-800">
           <a
-            href="https://github.com"
+            href="https://github.com/abhaypandey0572005-max"
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-arena-cyan text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition"
