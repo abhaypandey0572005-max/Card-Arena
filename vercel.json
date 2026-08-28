@@ -1,5 +1,6 @@
 {
   "framework": "vite",
+  "installCommand": "npm install --include=dev",
   "buildCommand": "npm run build:shared && npm run build:client",
   "outputDirectory": "packages/client/dist",
   "rewrites": [
