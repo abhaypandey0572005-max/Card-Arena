@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="flash-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ef4444" stop-opacity="0.9"/>
+      <stop offset="70%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#450a0a"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#flash-bg)"/>
+  <!-- Speed Force Electric Streaks -->
+  <path d="M20 50 L90 70 L60 120 L140 140" stroke="#facc15" stroke-width="4" fill="none" opacity="0.8"/>
+  <path d="M280 250 L210 230 L240 180 L160 160" stroke="#facc15" stroke-width="4" fill="none" opacity="0.8"/>
+  <!-- Crimson Speed Suit Mask -->
+  <path d="M150 40 C105 40 85 75 85 140 C85 195 105 240 150 250 C195 240 215 195 215 140 C215 75 195 40 150 40 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="4"/>
+  <!-- Gold Ear Wings -->
+  <polygon points="70,120 40,110 55,140 80,135" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+  <polygon points="230,120 260,110 245,140 220,135" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+  <!-- Face Opening -->
+  <polygon points="120,135 180,135 165,185 135,185" fill="#fed7aa"/>
+  <!-- Eyes -->
+  <ellipse cx="125" cy="120" rx="10" ry="6" fill="#ffffff" stroke="#7f1d1d" stroke-width="2"/>
+  <ellipse cx="175" cy="120" rx="10" ry="6" fill="#ffffff" stroke="#7f1d1d" stroke-width="2"/>
+  <!-- Golden Lightning Bolt on Chest -->
+  <polygon points="155,200 135,235 150,235 140,265 165,225 150,225" fill="#facc15" stroke="#ca8a04" stroke-width="3" filter="drop-shadow(0 0 6px #fde047)"/>
+</svg>

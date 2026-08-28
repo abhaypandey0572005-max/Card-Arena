@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="rock-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#b45309" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#78350f"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#rock-bg)"/>
+  <!-- Massive Muscular Traps & Samoan Chest Tattoo -->
+  <path d="M50 240 C50 180 90 170 110 160 L190 160 C210 170 250 180 250 240 L260 300 L40 300 Z" fill="#d97706" stroke="#78350f" stroke-width="4"/>
+  <!-- Tribal Tattoo Details on Left Shoulder/Chest -->
+  <g stroke="#451a03" stroke-width="2.5" fill="none" opacity="0.8">
+    <path d="M65 240 Q90 220 110 240 Q130 260 110 280"/>
+    <path d="M80 220 Q105 200 120 220"/>
+  </g>
+  <!-- Bald Chiseled Head -->
+  <path d="M150 45 C105 45 90 75 90 135 C90 195 110 230 150 235 C190 230 210 195 210 135 C210 75 195 45 150 45 Z" fill="#f59e0b" stroke="#78350f" stroke-width="3"/>
+  <!-- The Iconic Raised Eyebrow (People's Eyebrow!) -->
+  <path d="M110 100 Q130 95 142 110" stroke="#451a03" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <path d="M158 115 Q170 125 190 120" stroke="#451a03" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <!-- Intense Eyes -->
+  <ellipse cx="128" cy="120" rx="8" ry="5" fill="#ffffff" stroke="#451a03" stroke-width="2"/>
+  <circle cx="128" cy="120" r="3" fill="#451a03"/>
+  <ellipse cx="172" cy="130" rx="8" ry="5" fill="#ffffff" stroke="#451a03" stroke-width="2"/>
+  <circle cx="172" cy="130" r="3" fill="#451a03"/>
+  <!-- Smirk / Grin -->
+  <path d="M130 185 Q150 195 175 175" stroke="#451a03" stroke-width="4" fill="none" stroke-linecap="round"/>
+</svg>

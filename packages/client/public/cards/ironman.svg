@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="iron-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+    <linearGradient id="gold-plate" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <linearGradient id="red-plate" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <linearGradient id="arc-glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#iron-bg)"/>
+  <!-- Helmet Outer Red Shell -->
+  <path d="M150 35 C95 35 75 75 75 140 C75 200 95 245 120 265 L150 270 L180 265 C205 245 225 200 225 140 C225 75 205 35 150 35 Z" fill="url(#red-plate)" stroke="#450a0a" stroke-width="4"/>
+  <!-- Gold Face Plate -->
+  <path d="M150 70 C110 70 95 90 95 140 C95 185 110 230 135 245 L150 250 L165 245 C190 230 205 185 205 140 C205 90 190 70 150 70 Z" fill="url(#gold-plate)" stroke="#713f12" stroke-width="3"/>
+  <!-- Forehead Brow / Inset Lines -->
+  <path d="M110 115 L150 125 L190 115 L195 130 L150 140 L105 130 Z" fill="#b91c1c"/>
+  <!-- Left Eye Slit (Glowing Cyan) -->
+  <polygon points="108,145 138,148 135,155 112,153" fill="url(#arc-glow)" stroke="#0284c7" stroke-width="1.5" filter="drop-shadow(0 0 6px #38bdf8)"/>
+  <!-- Right Eye Slit (Glowing Cyan) -->
+  <polygon points="192,145 162,148 165,155 188,153" fill="url(#arc-glow)" stroke="#0284c7" stroke-width="1.5" filter="drop-shadow(0 0 6px #38bdf8)"/>
+  <!-- Mouth / Jaw Plate -->
+  <path d="M130 200 L170 200 L160 225 L140 225 Z" fill="#713f12" opacity="0.6"/>
+  <line x1="125" y1="210" x2="175" y2="210" stroke="#450a0a" stroke-width="2"/>
+</svg>

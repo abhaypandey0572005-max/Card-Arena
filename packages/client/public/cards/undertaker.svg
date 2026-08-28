@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="taker-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#581c87" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#2e1065"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#taker-bg)"/>
+  <!-- Purple Lightning -->
+  <path d="M40 30 L80 90 L65 95 L100 160" stroke="#c084fc" stroke-width="2.5" fill="none" opacity="0.6"/>
+  <path d="M260 30 L220 90 L235 95 L200 160" stroke="#c084fc" stroke-width="2.5" fill="none" opacity="0.6"/>
+  <!-- Black Leather Coat Shoulders -->
+  <path d="M60 210 L150 180 L240 210 L260 300 L40 300 Z" fill="#09090b" stroke="#3b0764" stroke-width="4"/>
+  <!-- Long Dark Hair -->
+  <path d="M90 90 C85 140 80 220 85 250 L115 250 L110 130 Z" fill="#09090b"/>
+  <path d="M210 90 C215 140 220 220 215 250 L185 250 L190 130 Z" fill="#09090b"/>
+  <!-- Pale Deadman Face -->
+  <path d="M150 65 C115 65 105 90 105 135 C105 180 120 200 150 205 C180 200 195 180 195 135 C195 90 185 65 150 65 Z" fill="#e2e8f0" stroke="#1e293b" stroke-width="3"/>
+  <!-- Wide-Brimmed Black Hat -->
+  <ellipse cx="150" cy="75" rx="110" ry="25" fill="#09090b" stroke="#3b0764" stroke-width="3"/>
+  <path d="M95 75 L105 35 L195 35 L205 75 Z" fill="#09090b" stroke="#3b0764" stroke-width="3"/>
+  <!-- Rolled-Back White Eyes (Deadman Stare) -->
+  <ellipse cx="130" cy="130" rx="8" ry="5" fill="#f8fafc" stroke="#475569" stroke-width="1.5"/>
+  <ellipse cx="170" cy="130" rx="8" ry="5" fill="#f8fafc" stroke="#475569" stroke-width="1.5"/>
+  <!-- Goatee -->
+  <path d="M135 180 C140 195 160 195 165 180 Z" fill="#09090b"/>
+</svg>

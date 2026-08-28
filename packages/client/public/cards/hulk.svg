@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="hulk-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#15803d" stop-opacity="0.9"/>
+      <stop offset="60%" stop-color="#14532d"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </radialGradient>
+    <linearGradient id="gamma-skin" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="50%" stop-color="#22c55e"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#hulk-bg)"/>
+  <!-- Massive Traps / Shoulders -->
+  <path d="M40 280 C40 180 80 160 110 150 L190 150 C220 160 260 180 260 280 Z" fill="url(#gamma-skin)" stroke="#052e16" stroke-width="4"/>
+  <!-- Giant Hulk Head -->
+  <path d="M150 50 C95 50 80 90 80 160 C80 230 110 260 150 265 C190 260 220 230 220 160 C220 90 205 50 150 50 Z" fill="url(#gamma-skin)" stroke="#052e16" stroke-width="5"/>
+  <!-- Messy Black Hair -->
+  <path d="M85 90 C80 40 120 20 150 20 C180 20 220 40 215 90 C200 65 175 60 150 70 C125 60 100 65 85 90 Z" fill="#0f172a"/>
+  <!-- Furious Brow Ridge -->
+  <path d="M95 125 C120 105 145 130 150 130 C155 130 180 105 205 125" stroke="#052e16" stroke-width="8" fill="none" stroke-linecap="round"/>
+  <!-- Glowing Green Eyes -->
+  <ellipse cx="120" cy="140" rx="10" ry="6" fill="#86efac" stroke="#052e16" stroke-width="2"/>
+  <circle cx="120" cy="140" r="3" fill="#052e16"/>
+  <ellipse cx="180" cy="140" rx="10" ry="6" fill="#86efac" stroke="#052e16" stroke-width="2"/>
+  <circle cx="180" cy="140" r="3" fill="#052e16"/>
+  <!-- Roaring Open Mouth / Teeth -->
+  <path d="M110 185 Q150 170 190 185 Q175 235 150 235 Q125 235 110 185 Z" fill="#450a0a" stroke="#052e16" stroke-width="4"/>
+  <!-- Teeth Rows -->
+  <path d="M120 185 L130 195 L140 185 L150 195 L160 185 L170 195 L180 185" fill="none" stroke="#f8fafc" stroke-width="3"/>
+  <path d="M125 220 L135 210 L145 220 L155 210 L165 220 L175 210" fill="none" stroke="#f8fafc" stroke-width="3"/>
+</svg>

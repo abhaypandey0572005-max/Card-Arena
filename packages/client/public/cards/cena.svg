@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="cena-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#16a34a" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#15803d"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#cena-bg)"/>
+  <!-- Muscular Shoulders & Green T-Shirt -->
+  <path d="M50 240 C50 180 90 170 110 160 L190 160 C210 170 250 180 250 240 L260 300 L40 300 Z" fill="#22c55e" stroke="#15803d" stroke-width="4"/>
+  <!-- "You Can't See Me" Hand Gesture -->
+  <g transform="translate(150, 150)">
+    <!-- 5 Open Fingers Waving in Front of Face -->
+    <rect x="-40" y="-30" width="14" height="60" rx="7" fill="#fed7aa" stroke="#78350f" stroke-width="2" transform="rotate(-25)"/>
+    <rect x="-18" y="-45" width="14" height="75" rx="7" fill="#fed7aa" stroke="#78350f" stroke-width="2" transform="rotate(-10)"/>
+    <rect x="5" y="-50" width="14" height="80" rx="7" fill="#fed7aa" stroke="#78350f" stroke-width="2" transform="rotate(5)"/>
+    <rect x="25" y="-40" width="14" height="65" rx="7" fill="#fed7aa" stroke="#78350f" stroke-width="2" transform="rotate(20)"/>
+    <ellipse cx="-45" cy="0" rx="10" ry="16" fill="#fed7aa" stroke="#78350f" stroke-width="2" transform="rotate(-40)"/>
+    <rect x="-35" y="35" width="70" height="25" rx="6" fill="#ea580c" stroke="#9a3412" stroke-width="2"/>
+    <text x="0" y="52" text-anchor="middle" font-size="12" font-weight="900" fill="#ffffff" font-family="sans-serif">HUSTLE</text>
+  </g>
+  <!-- Square Jaw Head (Behind Hand) -->
+  <path d="M150 45 C115 45 100 70 100 125 C100 170 115 195 150 200 C185 195 200 170 200 125 C200 70 185 45 150 45 Z" fill="#fed7aa" stroke="#78350f" stroke-width="3" opacity="0.75"/>
+  <!-- Military Buzzcut Hair -->
+  <path d="M100 65 C100 35 120 25 150 25 C180 25 200 35 200 65 L195 75 L105 75 Z" fill="#78350f"/>
+</svg>

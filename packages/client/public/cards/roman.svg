@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="roman-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#450a0a"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#roman-bg)"/>
+  <!-- Broad Tactical Vest Shoulders -->
+  <path d="M50 230 L150 195 L250 230 L270 300 L30 300 Z" fill="#18181b" stroke="#7f1d1d" stroke-width="4"/>
+  <!-- Red Ula Fala Lei Necklace -->
+  <ellipse cx="150" cy="225" rx="45" ry="25" fill="none" stroke="#dc2626" stroke-width="8" stroke-dasharray="10,4"/>
+  <!-- Long Wet Black Hair -->
+  <path d="M90 80 C80 130 75 220 85 260 L115 260 L110 130 Z" fill="#09090b"/>
+  <path d="M210 80 C220 130 225 220 215 260 L185 260 L190 130 Z" fill="#09090b"/>
+  <!-- Tribal Chief Head & Full Beard -->
+  <path d="M150 50 C110 50 95 80 95 135 C95 185 115 210 150 215 C185 210 205 185 205 135 C205 80 190 50 150 50 Z" fill="#d97706" stroke="#78350f" stroke-width="3"/>
+  <!-- Full Thick Black Beard -->
+  <path d="M110 130 C110 190 130 215 150 215 C170 215 190 190 190 130 C185 165 170 175 150 175 C130 175 115 165 110 130 Z" fill="#09090b"/>
+  <!-- Intense Dark Eyes -->
+  <ellipse cx="128" cy="115" rx="8" ry="5" fill="#ffffff" stroke="#09090b" stroke-width="2"/>
+  <circle cx="128" cy="115" r="3" fill="#09090b"/>
+  <ellipse cx="172" cy="115" rx="8" ry="5" fill="#ffffff" stroke="#09090b" stroke-width="2"/>
+  <circle cx="172" cy="115" r="3" fill="#09090b"/>
+  <!-- Golden Champion Crest -->
+  <polygon points="150,240 160,255 175,255 165,265 168,280 150,270 132,280 135,265 125,255 140,255" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+</svg>

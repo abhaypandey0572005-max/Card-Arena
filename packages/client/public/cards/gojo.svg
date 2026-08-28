@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="gojo-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0284c7" stop-opacity="0.85"/>
+      <stop offset="60%" stop-color="#312e81"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#gojo-bg)"/>
+  <!-- Infinity Domain Sphere Backdrop -->
+  <circle cx="150" cy="150" r="110" fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.5"/>
+  <circle cx="150" cy="150" r="85" fill="none" stroke="#818cf8" stroke-width="1.5" opacity="0.7"/>
+  <!-- High Collar Jujutsu High Black Uniform -->
+  <path d="M80 230 L150 195 L220 230 L240 300 L60 300 Z" fill="#09090b" stroke="#1e1b4b" stroke-width="4"/>
+  <!-- High Stiff Collar -->
+  <polygon points="120,180 150,210 180,180 150,195" fill="#18181b" stroke="#312e81" stroke-width="2"/>
+  <!-- Spiky Pure Snow-White Hair -->
+  <polygon points="150,30 135,75 165,75" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <polygon points="120,40 100,85 140,85" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <polygon points="180,40 200,85 160,85" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <polygon points="90,65 65,115 115,105" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <polygon points="210,65 235,115 185,105" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <!-- Handsome Face Shape -->
+  <polygon points="150,90 105,110 120,170 150,195 180,170 195,110" fill="#fdf2f8" stroke="#78350f" stroke-width="2"/>
+  <!-- Iconic Black Blindfold -->
+  <path d="M100 115 L200 115 L195 145 L105 145 Z" fill="#09090b" stroke="#1e1b4b" stroke-width="3"/>
+  <!-- Glowing Azure Six Eyes leaking through blindfold -->
+  <circle cx="130" cy="130" r="5" fill="#38bdf8" filter="drop-shadow(0 0 6px #38bdf8)"/>
+  <circle cx="170" cy="130" r="5" fill="#38bdf8" filter="drop-shadow(0 0 6px #38bdf8)"/>
+  <!-- Confident Smile -->
+  <path d="M140 170 Q150 175 160 170" stroke="#09090b" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+</svg>

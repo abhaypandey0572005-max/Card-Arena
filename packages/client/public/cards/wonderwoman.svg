@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="ww-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#b91c1c" stop-opacity="0.8"/>
+      <stop offset="70%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#ww-bg)"/>
+  <!-- Flowing Black Hair -->
+  <path d="M70 120 C50 180 55 270 70 300 L230 300 C245 270 250 180 230 120 C230 50 190 20 150 20 C110 20 70 50 70 120 Z" fill="#09090b"/>
+  <!-- Amazon Face -->
+  <path d="M150 60 C120 60 105 85 105 130 C105 175 125 195 150 200 C175 195 195 175 195 130 C195 85 180 60 150 60 Z" fill="#fed7aa" stroke="#78350f" stroke-width="3"/>
+  <!-- Golden Tiara with Red Star -->
+  <path d="M95 85 L150 65 L205 85 L190 105 L150 95 L110 105 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+  <polygon points="150,75 153,82 160,82 155,86 157,93 150,89 143,93 145,86 140,82 147,82" fill="#ef4444"/>
+  <!-- Strong Beautiful Eyes -->
+  <ellipse cx="130" cy="130" rx="9" ry="6" fill="#1e40af" stroke="#0f172a" stroke-width="2"/>
+  <ellipse cx="170" cy="130" rx="9" ry="6" fill="#1e40af" stroke="#0f172a" stroke-width="2"/>
+  <!-- Golden Eagle Crest on Red Bodice -->
+  <path d="M95 230 L150 215 L205 230 L215 300 L85 300 Z" fill="#dc2626" stroke="#991b1b" stroke-width="3"/>
+  <path d="M110 230 C130 220 145 235 150 245 C155 235 170 220 190 230 C180 245 165 255 150 260 C135 255 120 245 110 230 Z" fill="#facc15" stroke="#ca8a04" stroke-width="2"/>
+</svg>

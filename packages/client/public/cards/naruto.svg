@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="naruto-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ea580c" stop-opacity="0.85"/>
+      <stop offset="70%" stop-color="#9a3412"/>
+      <stop offset="100%" stop-color="#18181b"/>
+    </radialGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#naruto-bg)"/>
+  <!-- Spiky Blonde Hair -->
+  <polygon points="150,15 130,55 170,55" fill="#facc15"/>
+  <polygon points="115,25 90,65 135,65" fill="#facc15"/>
+  <polygon points="185,25 210,65 165,65" fill="#facc15"/>
+  <polygon points="80,55 55,105 105,95" fill="#facc15"/>
+  <polygon points="220,55 245,105 195,95" fill="#facc15"/>
+  <polygon points="50,105 35,155 85,135" fill="#facc15"/>
+  <polygon points="250,105 265,155 215,135" fill="#facc15"/>
+  <!-- Orange Jacket with Black Shoulders -->
+  <path d="M70 230 L150 205 L230 230 L250 300 L50 300 Z" fill="#ea580c" stroke="#9a3412" stroke-width="4"/>
+  <path d="M50 300 L70 230 L110 240 L100 300 Z" fill="#18181b"/>
+  <path d="M250 300 L230 230 L190 240 L200 300 Z" fill="#18181b"/>
+  <!-- Head -->
+  <path d="M150 70 C110 70 95 95 95 140 C95 185 115 205 150 210 C185 205 205 185 205 140 C205 95 190 70 150 70 Z" fill="#fed7aa" stroke="#78350f" stroke-width="3"/>
+  <!-- Konoha Headband Plate -->
+  <rect x="90" y="80" width="120" height="35" rx="5" fill="#334155" stroke="#0f172a" stroke-width="2"/>
+  <rect x="110" y="85" width="80" height="25" rx="3" fill="#cbd5e1" stroke="#475569" stroke-width="1.5"/>
+  <!-- Hidden Leaf Spiral Symbol -->
+  <path d="M145 95 C155 95 158 102 153 105 C148 107 143 100 150 97" stroke="#334155" stroke-width="2.5" fill="none"/>
+  <!-- Sage Mode Orange Eye Pigmentation -->
+  <ellipse cx="125" cy="140" rx="14" ry="9" fill="#f97316" opacity="0.6"/>
+  <ellipse cx="175" cy="140" rx="14" ry="9" fill="#f97316" opacity="0.6"/>
+  <!-- Sage Toad Eyes (Horizontal Bar Pupils) -->
+  <ellipse cx="125" cy="140" rx="9" ry="6" fill="#facc15" stroke="#78350f" stroke-width="1.5"/>
+  <rect x="118" y="138" width="14" height="4" rx="1" fill="#78350f"/>
+  <ellipse cx="175" cy="140" rx="9" ry="6" fill="#facc15" stroke="#78350f" stroke-width="1.5"/>
+  <rect x="168" y="138" width="14" height="4" rx="1" fill="#78350f"/>
+  <!-- Whiskers on Cheeks -->
+  <g stroke="#78350f" stroke-width="2" stroke-linecap="round">
+    <line x1="100" y1="160" x2="115" y2="162"/>
+    <line x1="100" y1="170" x2="115" y2="170"/>
+    <line x1="100" y1="180" x2="115" y2="178"/>
+    <line x1="200" y1="160" x2="185" y2="162"/>
+    <line x1="200" y1="170" x2="185" y2="170"/>
+    <line x1="200" y1="180" x2="185" y2="178"/>
+  </g>
+</svg>

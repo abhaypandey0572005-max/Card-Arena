@@ -1,0 +1,20 @@
+{
+  "name": "realtime-card-battler",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Real-Time Authoritative Multiplayer Card Battle Game",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:server": "npm run dev --workspace=packages/server",
+    "dev:client": "npm run dev --workspace=packages/client",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspace=packages/server"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.2"
+  }
+}

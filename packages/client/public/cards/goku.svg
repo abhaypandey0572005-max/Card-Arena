@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="goku-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    <linearGradient id="ui-hair" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#94a3b8"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#goku-bg)"/>
+  <!-- Divine Ultra Instinct Aura Particles -->
+  <circle cx="60" cy="80" r="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="240" cy="70" r="4" fill="#38bdf8" opacity="0.8"/>
+  <circle cx="80" cy="220" r="2" fill="#ffffff" opacity="0.8"/>
+  <circle cx="220" cy="240" r="3" fill="#38bdf8" opacity="0.8"/>
+  <!-- Spiky Ultra Instinct Silver Hair -->
+  <!-- Back Spikes -->
+  <polygon points="150,15 110,60 130,50" fill="url(#ui-hair)" stroke="#64748b" stroke-width="2"/>
+  <polygon points="100,30 60,90 90,80" fill="url(#ui-hair)" stroke="#64748b" stroke-width="2"/>
+  <polygon points="200,30 240,90 210,80" fill="url(#ui-hair)" stroke="#64748b" stroke-width="2"/>
+  <polygon points="50,90 20,150 60,135" fill="url(#ui-hair)" stroke="#64748b" stroke-width="2"/>
+  <polygon points="250,90 280,150 240,135" fill="url(#ui-hair)" stroke="#64748b" stroke-width="2"/>
+  <!-- Torso & Orange Martial Arts Gi -->
+  <path d="M70 240 L150 210 L230 240 L250 300 L50 300 Z" fill="#ea580c" stroke="#9a3412" stroke-width="4"/>
+  <polygon points="120,225 150,265 180,225 150,210" fill="#1e3a8a"/>
+  <!-- Saiyan Head -->
+  <polygon points="150,85 100,105 115,170 150,210 185,170 200,105" fill="#fed7aa" stroke="#78350f" stroke-width="3"/>
+  <!-- Front Bangs -->
+  <polygon points="120,80 140,125 150,85" fill="url(#ui-hair)" stroke="#64748b" stroke-width="1.5"/>
+  <polygon points="180,80 160,125 150,85" fill="url(#ui-hair)" stroke="#64748b" stroke-width="1.5"/>
+  <!-- Ultra Instinct Silver Eyes -->
+  <polygon points="120,135 140,140 135,148 118,143" fill="#ffffff" stroke="#0284c7" stroke-width="2"/>
+  <circle cx="130" cy="142" r="3" fill="#94a3b8"/>
+  <circle cx="130" cy="142" r="1.5" fill="#0f172a"/>
+  <polygon points="180,135 160,140 165,148 182,143" fill="#ffffff" stroke="#0284c7" stroke-width="2"/>
+  <circle cx="170" cy="142" r="3" fill="#94a3b8"/>
+  <circle cx="170" cy="142" r="1.5" fill="#0f172a"/>
+</svg>

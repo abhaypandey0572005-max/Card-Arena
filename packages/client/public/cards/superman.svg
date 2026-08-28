@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <radialGradient id="sup-bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1d4ed8" stop-opacity="0.85"/>
+      <stop offset="70%" stop-color="#1e3a8a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </radialGradient>
+    <linearGradient id="shield-yellow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <linearGradient id="shield-red" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef4444"/>
+      <stop offset="100%" stop-color="#991b1b"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="20" fill="url(#sup-bg)"/>
+  <!-- Red Cape Flowing in Wind -->
+  <path d="M40 120 C10 180 20 280 45 300 L95 240 L85 130 Z" fill="#dc2626"/>
+  <path d="M260 120 C290 180 280 280 255 300 L205 240 L215 130 Z" fill="#dc2626"/>
+  <!-- Blue Suit Torso -->
+  <path d="M85 130 L150 115 L215 130 L235 300 L65 300 Z" fill="#1e40af" stroke="#172554" stroke-width="4"/>
+  <!-- Iconic Kryptonian S-Shield on Chest -->
+  <polygon points="150,140 210,165 190,235 150,265 110,235 90,165" fill="url(#shield-yellow)" stroke="url(#shield-red)" stroke-width="6"/>
+  <!-- Iconic S Emblem Shape -->
+  <path d="M130 170 C140 160 170 160 180 175 C185 185 175 195 155 200 C130 205 125 220 135 235 C145 250 175 250 185 235 L175 225 C165 235 145 235 140 225 C135 215 145 210 160 205 C185 195 190 180 180 165 C170 150 140 150 125 162 Z" fill="url(#shield-red)"/>
+  <!-- Heroic Chin / Head -->
+  <path d="M150 25 C120 25 105 50 105 85 C105 120 125 140 150 145 C175 140 195 120 195 85 C195 50 180 25 150 25 Z" fill="#fed7aa" stroke="#78350f" stroke-width="3"/>
+  <!-- Classic Black Hair with S-Curl -->
+  <path d="M100 65 C95 25 135 10 150 10 C180 10 205 25 200 65 C185 45 170 40 150 45 C140 45 135 50 145 60 C150 65 145 70 140 65 C135 55 125 45 100 65 Z" fill="#0f172a"/>
+  <!-- Solar Heat Vision Glowing Eyes -->
+  <ellipse cx="130" cy="85" rx="6" ry="4" fill="#ef4444" filter="drop-shadow(0 0 5px #f87171)"/>
+  <ellipse cx="170" cy="85" rx="6" ry="4" fill="#ef4444" filter="drop-shadow(0 0 5px #f87171)"/>
+</svg>
