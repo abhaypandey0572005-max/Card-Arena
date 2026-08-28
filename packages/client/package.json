@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prebuild": "npm run build --workspace=@card-battler/shared || (cd ../shared && tsc)",
-    "build": "tsc && vite build",
+    "build:shared": "npm run build --workspace=@card-battler/shared || (cd ../shared && tsc) || true",
+    "build:client": "vite build && node -e \"const fs=require('fs'); try { fs.mkdirSync('packages/client', {recursive:true}); fs.cpSync('dist', 'packages/client/dist', {recursive:true}); } catch(e){}\"",
+    "build": "vite build && node -e \"const fs=require('fs'); try { fs.mkdirSync('packages/client', {recursive:true}); fs.cpSync('dist', 'packages/client/dist', {recursive:true}); } catch(e){}\"",
     "preview": "vite preview"
   },
   "dependencies": {

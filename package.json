@@ -7,7 +7,6 @@
     "packages/*"
   ],
   "scripts": {
-    "postinstall": "npm run build --workspace=@card-battler/shared",
     "build:shared": "npm run build --workspace=@card-battler/shared",
     "build:server": "npm run build --workspace=@card-battler/server",
     "build:client": "npm run build --workspace=@card-battler/client",
