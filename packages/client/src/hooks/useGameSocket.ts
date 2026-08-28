@@ -34,9 +34,21 @@ export function useGameSocket() {
 
   // Connect to WebSocket
   useEffect(() => {
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    let wsUrl = '';
+    const envWsUrl = import.meta.env.VITE_WS_URL;
+    const envServerUrl = import.meta.env.VITE_SERVER_URL;
 
+    if (envWsUrl) {
+      wsUrl = envWsUrl;
+    } else if (envServerUrl) {
+      const base = envServerUrl.replace(/^http/, 'ws');
+      wsUrl = `${base.replace(/\/$/, '')}/ws`;
+    } else {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsUrl = `${protocol}//${window.location.host}/ws`;
+    }
+
+    console.log('Connecting to WebSocket at:', wsUrl);
     const ws = new WebSocket(wsUrl);
     socketRef.current = ws;
 
