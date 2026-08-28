@@ -17,7 +17,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@card-battler/shared': path.resolve(__dirname, '../shared/src'),
+      '@card-battler/shared': path.resolve(__dirname, '../shared/dist/index.js'),
     },
   },
 });

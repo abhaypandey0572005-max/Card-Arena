@@ -7,10 +7,14 @@
     "packages/*"
   ],
   "scripts": {
+    "build:shared": "npm run build --workspace=@card-battler/shared",
+    "build:server": "npm run build --workspace=@card-battler/server",
+    "build:client": "npm run build --workspace=@card-battler/client",
+    "build": "npm run build:shared && npm run build:server && npm run build:client",
+    "start": "npm run start --workspace=@card-battler/server",
     "dev:server": "npm run dev --workspace=packages/server",
     "dev:client": "npm run dev --workspace=packages/client",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-    "build": "npm run build --workspaces",
     "test": "npm run test --workspace=packages/server"
   },
   "devDependencies": {
