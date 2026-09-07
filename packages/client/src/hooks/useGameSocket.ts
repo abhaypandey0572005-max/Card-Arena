@@ -44,6 +44,9 @@ export function useGameSocket() {
     } else if (envServerUrl) {
       const base = envServerUrl.replace(/^http/, 'ws');
       wsUrl = `${base.replace(/\/$/, '')}/ws`;
+    } else if (typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')) {
+      // Auto-connect to deployed Render WebSocket backend when hosted on Vercel
+      wsUrl = 'wss://card-arena-pu68.onrender.com/ws';
     } else {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       wsUrl = `${protocol}//${window.location.host}/ws`;
