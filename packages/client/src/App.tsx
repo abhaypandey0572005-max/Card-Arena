@@ -7,6 +7,7 @@ import { CustomDeckBuilder } from './components/CustomDeckBuilder.js';
 import { LeaderboardModal } from './components/LeaderboardModal.js';
 import { FounderModal } from './components/FounderModal.js';
 import { UniverseSelectorModal, UNIVERSES } from './components/UniverseSelector.js';
+import { ShowdownArena } from './components/ShowdownArena.js';
 import { Lobby } from './components/Lobby.js';
 import { MatchmakingRadar } from './components/MatchmakingRadar.js';
 import { FriendRoomModal } from './components/FriendRoomModal.js';
@@ -30,7 +31,7 @@ import {
 } from 'lucide-react';
 import { PRESET_DECKS } from '@card-battler/shared';
 
-type ViewMode = 'landing' | 'deck-studio' | 'custom-decks' | 'lobby';
+type ViewMode = 'landing' | 'deck-studio' | 'custom-decks' | 'lobby' | 'showdown';
 
 export const App: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -112,12 +113,12 @@ export const App: React.FC = () => {
     joinQueue(currentPlayerName, 'cyber-runner', selectedDeckId);
   };
 
-  // STRICT UNIVERSE VS UNIVERSE (Marvel vs Marvel, DC vs DC, Pokemon vs Pokemon, etc.)
+  // 5-CARD STAT SHOWDOWN (User's desired mode: 5 cards each, card-vs-card stat clash!)
   const handlePlayVsAi = (universeDeckId?: string) => {
     soundFX.playCardPlay();
-    const deckToUse = universeDeckId || selectedDeckId;
-    startAiMatch(currentPlayerName, 'cyber-runner', deckToUse, deckToUse);
+    if (universeDeckId) setSelectedDeckId(universeDeckId);
     setShowUniverseModal(false);
+    setViewMode('showdown');
   };
 
   const getMyPlayerId = (): string => {
@@ -330,6 +331,16 @@ export const App: React.FC = () => {
           </>
         ) : queueState.inQueue ? (
           <MatchmakingRadar queueState={queueState} onCancelQueue={leaveQueue} />
+        ) : viewMode === 'showdown' ? (
+          <ShowdownArena
+            universeId={selectedDeckId}
+            playerName={currentPlayerName}
+            onExit={() => setViewMode('landing')}
+            onChangeUniverse={() => {
+              setViewMode('landing');
+              setShowUniverseModal(true);
+            }}
+          />
         ) : viewMode === 'custom-decks' ? (
           <CustomDeckBuilder
             onBackToArena={() => setViewMode('landing')}
