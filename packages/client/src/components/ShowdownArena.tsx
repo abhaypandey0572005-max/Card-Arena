@@ -5,6 +5,7 @@ import {
   ShowdownMatchState, 
   initShowdownMatch, 
   evaluateShowdownClash, 
+  chooseAiLeadCard,
   chooseAiCounterCard,
   RoundClashResult 
 } from '../utils/showdown-engine.js';
@@ -17,12 +18,13 @@ import {
   Wind, 
   Flame, 
   Trophy, 
-  X, 
   RotateCcw, 
   Sparkles,
   Bot,
   User,
-  ArrowRight
+  ArrowRight,
+  ShieldAlert,
+  Target
 } from 'lucide-react';
 
 interface ShowdownArenaProps {
@@ -49,32 +51,49 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
     setTimeout(() => setScreenShake(false), 450);
   };
 
+  // Automated AI Lead: When Computer lost last round, Computer must play first
+  useEffect(() => {
+    if (
+      match.currentLeader === 'opponent' &&
+      !match.playedOpponentCard &&
+      match.phase !== 'match_ended' &&
+      match.round <= match.maxRounds &&
+      match.opponentHand.length > 0
+    ) {
+      const timer = setTimeout(() => {
+        const aiLead = chooseAiLeadCard(match.opponentHand);
+        const nextOpponentHand = match.opponentHand.filter((c) => c.id !== aiLead.id);
+
+        soundFX.playCardPlay();
+        setMatch((prev) => ({
+          ...prev,
+          opponentHand: nextOpponentHand,
+          playedOpponentCard: aiLead,
+          phase: 'player_turn',
+        }));
+      }, 700);
+
+      return () => clearTimeout(timer);
+    }
+  }, [match.round, match.currentLeader, match.playedOpponentCard, match.phase]);
+
   // When player plays a card from hand
   const handlePlayCard = (card: CardTemplate) => {
     if (match.phase !== 'player_turn') return;
 
-    soundFX.playCardPlay();
-
-    // 1. Set player's card into the clash stage
     const nextPlayerHand = match.playerHand.filter((c) => c.id !== card.id);
-    
-    setMatch((prev) => ({
-      ...prev,
-      playerHand: nextPlayerHand,
-      playedPlayerCard: card,
-      phase: 'opponent_thinking',
-    }));
 
-    // 2. Computer thinks for 1.2 seconds, then plays counter card
-    setTimeout(() => {
-      const aiCard = chooseAiCounterCard(match.opponentHand, card);
-      const nextOpponentHand = match.opponentHand.filter((c) => c.id !== aiCard.id);
+    if (match.currentLeader === 'opponent') {
+      // ----------------------------------------------------
+      // CASE 1: Computer already led! Player is countering!
+      // ----------------------------------------------------
+      if (!match.playedOpponentCard) return; // Wait for computer to place lead
 
-      soundFX.playCardHover();
+      soundFX.playCardPlay();
       soundFX.playAttack();
       triggerShake();
 
-      // 3. Evaluate Clash Result
+      const aiCard = match.playedOpponentCard;
       const result: RoundClashResult = evaluateShowdownClash(card, aiCard);
 
       if (result.winner === 'player') {
@@ -90,17 +109,63 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
 
       setMatch((prev) => ({
         ...prev,
-        opponentHand: nextOpponentHand,
-        playedOpponentCard: aiCard,
+        playerHand: nextPlayerHand,
+        playedPlayerCard: card,
         lastClashResult: result,
         playerScore: nextPlayerScore,
         opponentScore: nextOpponentScore,
         phase: 'clash_reveal',
       }));
-    }, 1200);
+
+    } else {
+      // ----------------------------------------------------
+      // CASE 2: Player is leading! Computer will counter!
+      // ----------------------------------------------------
+      soundFX.playCardPlay();
+
+      setMatch((prev) => ({
+        ...prev,
+        playerHand: nextPlayerHand,
+        playedPlayerCard: card,
+        phase: 'opponent_thinking',
+      }));
+
+      // Computer thinks for 1.1 seconds, then plays counter card
+      setTimeout(() => {
+        const aiCard = chooseAiCounterCard(match.opponentHand, card);
+        const nextOpponentHand = match.opponentHand.filter((c) => c.id !== aiCard.id);
+
+        soundFX.playCardHover();
+        soundFX.playAttack();
+        triggerShake();
+
+        const result: RoundClashResult = evaluateShowdownClash(card, aiCard);
+
+        if (result.winner === 'player') {
+          soundFX.playVictory();
+        } else if (result.winner === 'opponent') {
+          soundFX.playDamage();
+        }
+
+        setShowStatBars(true);
+
+        const nextPlayerScore = result.winner === 'player' ? match.playerScore + 1 : result.winner === 'tie' ? match.playerScore + 1 : match.playerScore;
+        const nextOpponentScore = result.winner === 'opponent' ? match.opponentScore + 1 : result.winner === 'tie' ? match.opponentScore + 1 : match.opponentScore;
+
+        setMatch((prev) => ({
+          ...prev,
+          opponentHand: nextOpponentHand,
+          playedOpponentCard: aiCard,
+          lastClashResult: result,
+          playerScore: nextPlayerScore,
+          opponentScore: nextOpponentScore,
+          phase: 'clash_reveal',
+        }));
+      }, 1100);
+    }
   };
 
-  // Next round transition
+  // Next round transition with "Loser Plays First" logic
   const handleNextRound = () => {
     soundFX.playCardPlay();
     setShowStatBars(false);
@@ -122,13 +187,28 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
         matchWinner,
       }));
     } else {
-      // Start Next Round
+      // Determine initiative for next round: LOSER LEADS NEXT ROUND
+      const lastWinner = match.lastClashResult?.winner;
+      let nextLeader: 'player' | 'opponent';
+
+      if (lastWinner === 'player') {
+        // Player won -> Computer lost -> Computer MUST play first!
+        nextLeader = 'opponent';
+      } else if (lastWinner === 'opponent') {
+        // Computer won -> Player lost -> Player MUST play first!
+        nextLeader = 'player';
+      } else {
+        // Tie -> Alternate
+        nextLeader = match.currentLeader === 'player' ? 'opponent' : 'player';
+      }
+
       setMatch((prev) => ({
         ...prev,
         round: prev.round + 1,
         playedPlayerCard: null,
         playedOpponentCard: null,
         lastClashResult: null,
+        currentLeader: nextLeader,
         phase: 'player_turn',
       }));
     }
@@ -226,15 +306,29 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
       </div>
 
       {/* ================= CENTER CLASH ARENA ================= */}
-      <div className="relative w-full max-w-5xl mx-auto flex-1 flex flex-col items-center justify-center my-auto py-4 z-20">
+      <div className="relative w-full max-w-5xl mx-auto flex-1 flex flex-col items-center justify-center my-auto py-3 z-20">
         
-        {/* Waiting for player prompt */}
+        {/* Dynamic Turn Initiative Banners */}
         {match.phase === 'player_turn' && !match.playedPlayerCard && (
-          <div className="text-center animate-bounce mb-4">
-            <span className="px-5 py-2 rounded-full bg-arena-cyan/20 border border-arena-cyan text-arena-cyan font-black text-sm uppercase tracking-wider shadow-lg shadow-arena-cyan/20 flex items-center gap-2">
-              <Sparkles className="w-4 h-4" />
-              👉 Select 1 of your {match.playerHand.length} cards below to play!
-            </span>
+          <div className="text-center animate-bounce mb-3">
+            {match.currentLeader === 'opponent' ? (
+              match.playedOpponentCard ? (
+                <span className="px-5 py-2 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-300 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                  <Target className="w-4 h-4 text-emerald-400 animate-spin" />
+                  🎯 Computer lost last round and played first! Pick your counter card to crush it!
+                </span>
+              ) : (
+                <span className="px-5 py-2 rounded-full bg-red-500/20 border border-red-500 text-red-300 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg flex items-center gap-2">
+                  <Bot className="w-4 h-4 text-red-400" />
+                  🤖 Computer lost last round and is picking its lead card...
+                </span>
+              )
+            ) : (
+              <span className="px-5 py-2 rounded-full bg-arena-cyan/20 border border-arena-cyan text-arena-cyan font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-arena-cyan/20 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                ⚔️ YOUR TURN TO LEAD: Pick 1 of your {match.playerHand.length} cards below to play!
+              </span>
+            )}
           </div>
         )}
 
@@ -243,17 +337,18 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
           
           {/* Player Card Pedestal (Left) */}
           <div className="flex flex-col items-center">
-            <span className="text-xs font-black uppercase tracking-wider text-arena-cyan mb-2">
-              Your Hero
+            <span className="text-xs font-black uppercase tracking-wider text-arena-cyan mb-2 flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5" />
+              {match.currentLeader === 'player' ? 'Your Lead Card' : 'Your Counter Card'}
             </span>
             {match.playedPlayerCard ? (
               <div className="animate-fade-in transform scale-105 transition-all">
                 <Card3D card={match.playedPlayerCard} />
               </div>
             ) : (
-              <div className="w-44 h-64 sm:w-48 sm:h-72 rounded-2xl border-2 border-dashed border-arena-cyan/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-xs font-bold gap-2">
+              <div className="w-44 h-64 sm:w-48 sm:h-72 rounded-2xl border-2 border-dashed border-arena-cyan/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-xs font-bold gap-2 text-center p-4">
                 <span className="text-3xl opacity-40">⚔️</span>
-                <span>Your Card Goes Here</span>
+                <span>{match.currentLeader === 'opponent' ? 'Awaiting Your Counter' : 'Your Lead Card Goes Here'}</span>
               </div>
             )}
           </div>
@@ -270,7 +365,7 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
             )}
 
             {match.phase === 'clash_reveal' && result && (
-              <div className="w-full bg-slate-950/90 border border-slate-700 rounded-2xl p-4 shadow-2xl flex flex-col items-center gap-3 animate-fade-in">
+              <div className="w-full bg-slate-950/95 border border-slate-700 rounded-2xl p-4 shadow-2xl flex flex-col items-center gap-3 animate-fade-in">
                 <span className="text-xs font-black uppercase tracking-wider text-slate-400 font-cinzel">
                   STAT SHOWDOWN
                 </span>
@@ -338,10 +433,21 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                     : `🤝 Tied Round! (+1 pt each)`}
                 </div>
 
+                {/* Next Turn Initiative Notice */}
+                <div className="text-[10px] text-slate-400 font-bold tracking-wide uppercase text-center">
+                  {match.round < match.maxRounds && (
+                    result.winner === 'player'
+                      ? '🤖 Loser Leads: Computer must play first next round!'
+                      : result.winner === 'opponent'
+                      ? '⚔️ Loser Leads: You must play first next round!'
+                      : '🤝 Tied: Turn initiative alternates!'
+                  )}
+                </div>
+
                 {/* Next Round Button */}
                 <button
                   onClick={handleNextRound}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-105 active:scale-95 border border-white"
+                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-105 active:scale-95 border border-white cursor-pointer"
                 >
                   <span>{match.round >= match.maxRounds ? 'View Final Results ➔' : 'Next Round ➔'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -358,17 +464,18 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
 
           {/* Opponent Card Pedestal (Right) */}
           <div className="flex flex-col items-center">
-            <span className="text-xs font-black uppercase tracking-wider text-red-400 mb-2">
-              Computer Counter
+            <span className="text-xs font-black uppercase tracking-wider text-red-400 mb-2 flex items-center gap-1.5">
+              <Bot className="w-3.5 h-3.5" />
+              {match.currentLeader === 'opponent' ? 'Computer Lead (Target)' : 'Computer Counter'}
             </span>
             {match.playedOpponentCard ? (
               <div className="animate-fade-in transform scale-105 transition-all">
                 <Card3D card={match.playedOpponentCard} />
               </div>
             ) : (
-              <div className="w-44 h-64 sm:w-48 sm:h-72 rounded-2xl border-2 border-dashed border-red-500/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-xs font-bold gap-2">
+              <div className="w-44 h-64 sm:w-48 sm:h-72 rounded-2xl border-2 border-dashed border-red-500/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-xs font-bold gap-2 text-center p-4">
                 <span className="text-3xl opacity-40">🤖</span>
-                <span>Awaiting Counter</span>
+                <span>{match.currentLeader === 'opponent' ? 'Computer Choosing Lead...' : 'Awaiting Computer Counter'}</span>
               </div>
             )}
           </div>
@@ -382,24 +489,29 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
             Your Hand ({match.playerHand.length} cards remaining):
           </span>
           <span className="text-[11px] text-slate-400 italic">
-            Click any card to duel with it!
+            {match.currentLeader === 'opponent' && match.playedOpponentCard
+              ? '🎯 Pick the best counter card to defeat the Computer\'s card!'
+              : 'Click any card to play it into battle!'}
           </span>
         </div>
 
         <div className="flex items-center justify-center gap-3 sm:gap-5 overflow-x-auto w-full py-2 px-2">
-          {match.playerHand.map((card) => (
-            <div
-              key={card.id}
-              onClick={() => handlePlayCard(card)}
-              className={`transform transition-all duration-200 ${
-                match.phase === 'player_turn'
-                  ? 'cursor-pointer hover:scale-105 hover:-translate-y-2'
-                  : 'opacity-50 pointer-events-none'
-              }`}
-            >
-              <Card3D card={card} isPlayable={match.phase === 'player_turn'} />
-            </div>
-          ))}
+          {match.playerHand.map((card) => {
+            const isClickable = match.phase === 'player_turn' && (match.currentLeader === 'player' || Boolean(match.playedOpponentCard));
+            return (
+              <div
+                key={card.id}
+                onClick={() => isClickable && handlePlayCard(card)}
+                className={`transform transition-all duration-200 ${
+                  isClickable
+                    ? 'cursor-pointer hover:scale-105 hover:-translate-y-2'
+                    : 'opacity-50 pointer-events-none'
+                }`}
+              >
+                <Card3D card={card} isPlayable={isClickable} />
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -444,7 +556,7 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
             <div className="flex flex-col gap-2.5 w-full">
               <button
                 onClick={handleRematch}
-                className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-arena-cyan/30 transition transform hover:scale-105 active:scale-95 border border-white"
+                className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-arena-cyan/30 transition transform hover:scale-105 active:scale-95 border border-white cursor-pointer"
               >
                 <RotateCcw className="w-4 h-4" />
                 Play Again (Same Realm)
@@ -454,14 +566,14 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                 onClick={() => {
                   onChangeUniverse();
                 }}
-                className="w-full py-3 px-6 rounded-xl glass-panel border border-slate-700 hover:border-arena-cyan text-slate-200 font-bold text-sm uppercase tracking-wider transition"
+                className="w-full py-3 px-6 rounded-xl glass-panel border border-slate-700 hover:border-arena-cyan text-slate-200 font-bold text-sm uppercase tracking-wider transition cursor-pointer"
               >
                 Change Battle Universe
               </button>
 
               <button
                 onClick={onExit}
-                className="w-full py-2.5 px-6 text-slate-500 hover:text-slate-300 font-bold text-xs uppercase tracking-wider transition"
+                className="w-full py-2.5 px-6 text-slate-500 hover:text-slate-300 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
               >
                 Return to Main Menu
               </button>

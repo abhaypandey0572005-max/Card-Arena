@@ -44,8 +44,8 @@ export const CharacterArt: React.FC<CharacterArtProps> = ({
     );
   }
 
-  // Official high-definition character photo / artwork stored locally
-  const imagePath = `/cards/${artIcon}.jpg`;
+  // Official high-definition character photo / artwork
+  const imagePath = imageUrl || `/cards/${artIcon}.jpg`;
 
   return (
     <div className={`relative flex items-center justify-center overflow-hidden bg-slate-950 ${className}`}>

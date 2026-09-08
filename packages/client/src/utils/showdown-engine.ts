@@ -31,6 +31,7 @@ export interface ShowdownMatchState {
   playedPlayerCard: CardTemplate | null;
   playedOpponentCard: CardTemplate | null;
   lastClashResult: RoundClashResult | null;
+  currentLeader: 'player' | 'opponent'; // Who leads first in the current round
   phase: 'player_turn' | 'opponent_thinking' | 'clash_reveal' | 'match_ended';
   matchWinner: 'player' | 'opponent' | 'tie' | null;
 }
@@ -65,7 +66,7 @@ export function initShowdownMatch(universeId: string = 'marvel-avengers'): Showd
   // Shuffle the universe cards
   const shuffled = shuffle(fullDeck);
 
-  // Deal 5 random cards each
+  // Deal 5 random cards each from the 12-card universe deck
   const playerHand = shuffled.slice(0, 5);
   const opponentHand = shuffled.slice(5, 10);
 
@@ -80,6 +81,7 @@ export function initShowdownMatch(universeId: string = 'marvel-avengers'): Showd
     playedPlayerCard: null,
     playedOpponentCard: null,
     lastClashResult: null,
+    currentLeader: 'player', // Round 1 starts with player leading
     phase: 'player_turn',
     matchWinner: null,
   };
@@ -174,7 +176,25 @@ export function evaluateShowdownClash(
 }
 
 /**
- * Computer AI chooses the best counter-card from its hand against the player's card
+ * Computer AI chooses a strategic lead card when it loses a round and is forced to play first
+ */
+export function chooseAiLeadCard(aiHand: CardTemplate[]): CardTemplate {
+  if (aiHand.length === 1) return aiHand[0];
+
+  // Sort by total combat score
+  const sorted = [...aiHand].sort((a, b) => {
+    const totalA = (a.attack || 0) + (a.speed || 5) + (a.agility || 5);
+    const totalB = (b.attack || 0) + (b.speed || 5) + (b.agility || 5);
+    return totalA - totalB;
+  });
+
+  // Pick the median-power card to avoid immediately burning its strongest card
+  const midIndex = Math.floor(sorted.length / 2);
+  return sorted[midIndex];
+}
+
+/**
+ * Computer AI chooses the best counter-card from its hand against the player's lead card
  */
 export function chooseAiCounterCard(
   aiHand: CardTemplate[],
