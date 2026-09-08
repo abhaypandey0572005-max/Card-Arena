@@ -50,6 +50,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
 }) => {
   const [selectedAttackerId, setSelectedAttackerId] = useState<string | null>(null);
   const [selectedHandCardId, setSelectedHandCardId] = useState<string | null>(null);
+  const [energyNotice, setEnergyNotice] = useState<string | null>(null);
   const [showLogMobile, setShowLogMobile] = useState(false);
   const [showTurnBanner, setShowTurnBanner] = useState(false);
   const [screenShake, setScreenShake] = useState(false);
@@ -63,6 +64,11 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
   const isMyTurn = gameState.activePlayerId === myPlayerId;
   const opponentHasTaunt = opponent.board.some((m) => m.isTaunt);
   const prevTurnRef = useRef<number>(gameState.turn);
+
+  // Ready attackers & playable cards count
+  const readyMinions = me.board.filter((m) => m.canAttack && m.attacksThisTurn === 0);
+  const readyMinionsCount = readyMinions.length;
+  const playableCardsCount = me.hand.filter((c) => me.mana >= c.manaCost).length;
 
   // Trigger "YOUR TURN" banner & audio chime when turn switches to player
   useEffect(() => {
@@ -106,26 +112,54 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
   const selectedAttacker = me.board.find((m) => m.instanceId === selectedAttackerId);
   const selectedHandCard = me.hand.find((c) => c.instanceId === selectedHandCardId);
 
-  // Handle clicking a card in player's hand
+  // Handle clicking a card in player's hand - INSTANT 1-CLICK SUMMON
   const handleHandCardClick = (card: CardInstance) => {
-    if (!isMyTurn) return;
-    if (me.mana < card.manaCost) return;
-
-    setSelectedAttackerId(null);
-
-    if (card.effect && (card.effect.type === 'direct_damage' || card.effect.type === 'buff_minion')) {
-      if (selectedHandCardId === card.instanceId) {
-        setSelectedHandCardId(null);
-      } else {
-        soundFX.playCardHover();
-        setSelectedHandCardId(card.instanceId);
-      }
+    if (!isMyTurn) {
+      soundFX.playCardHover();
+      setEnergyNotice("⏳ Opponent's turn. Please wait!");
+      setTimeout(() => setEnergyNotice(null), 2500);
+      return;
+    }
+    if (me.mana < card.manaCost) {
+      soundFX.playCardHover();
+      setEnergyNotice(`⚡ Needs ${card.manaCost} Energy (You have ${me.mana}). Gain +1 next turn!`);
+      setTimeout(() => setEnergyNotice(null), 3000);
       return;
     }
 
+    setSelectedAttackerId(null);
+    setSelectedHandCardId(null);
     soundFX.playCardPlay();
     onPlayCard(card.instanceId);
-    setSelectedHandCardId(null);
+  };
+
+  // 1-Click All-Out Strike: All ready heroes attack automatically!
+  const handleAllOutStrike = () => {
+    if (!isMyTurn) return;
+
+    if (readyMinions.length === 0) {
+      setEnergyNotice("🛡️ No heroes ready to attack right now. Summon units or click End Turn!");
+      setTimeout(() => setEnergyNotice(null), 2500);
+      return;
+    }
+
+    soundFX.playAttack();
+    soundFX.playDamage();
+    triggerShake();
+
+    const tauntEnemy = opponent.board.find((m) => m.isTaunt && m.currentHealth > 0);
+
+    readyMinions.forEach((minion, index) => {
+      setTimeout(() => {
+        if (tauntEnemy) {
+          onAttackMinion(minion.instanceId, tauntEnemy.instanceId);
+        } else {
+          onAttackHero(minion.instanceId, opponent.id);
+        }
+      }, index * 250);
+    });
+
+    setSelectedAttackerId(null);
   };
 
   // Handle clicking friendly minion
@@ -353,6 +387,37 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
             )}
           </div>
 
+          {/* ================= BEGINNER ASSISTANT COACH ================= */}
+          <div className="w-full bg-slate-900/90 border border-slate-700/60 rounded-xl px-4 py-2 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs my-1 shadow-md">
+            <div className="flex items-center gap-2">
+              <span className="text-amber-400 text-base">💡</span>
+              <span className="font-semibold text-slate-200">
+                {!isMyTurn ? (
+                  <span className="text-slate-400">Opponent is making their moves... watch the arena!</span>
+                ) : readyMinionsCount > 0 ? (
+                  <span>
+                    <strong className="text-emerald-400 font-bold">Step 2:</strong> {readyMinionsCount} hero(es) are ready! Click <strong className="text-emerald-300 underline cursor-pointer" onClick={handleAllOutStrike}>[⚔️ All-Out Strike]</strong> to attack!
+                  </span>
+                ) : playableCardsCount > 0 ? (
+                  <span>
+                    <strong className="text-arena-cyan font-bold">Step 1:</strong> Click any glowing card in your hand to summon your hero! (Energy: {me.mana})
+                  </span>
+                ) : (
+                  <span>
+                    <strong className="text-sky-300 font-bold">Step 3:</strong> Turn actions complete! Click <strong className="text-white">[End Turn ➔]</strong> to pass.
+                  </span>
+                )}
+              </span>
+            </div>
+
+            {/* Energy warning / reminder toast */}
+            {energyNotice && (
+              <div className="px-3 py-1 rounded-lg bg-amber-500/20 border border-amber-400 text-amber-300 font-bold text-xs animate-fade-in flex items-center gap-1.5 shrink-0">
+                <span>⚠️</span> {energyNotice}
+              </div>
+            )}
+          </div>
+
           {/* ================= CENTER COMBAT LANE ================= */}
           <div className="relative py-2 flex items-center justify-between border-y border-slate-800/80 my-1 px-4 bg-slate-950/70 rounded-2xl">
             {/* Active Turn Badge */}
@@ -388,7 +453,7 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
               </div>
             </div>
 
-            {/* End Turn & Mobile Toggle */}
+            {/* Combat Actions: All-Out Strike & End Turn */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setShowLogMobile(!showLogMobile)}
@@ -397,13 +462,29 @@ export const Battlefield: React.FC<BattlefieldProps> = ({
                 <Menu className="w-4 h-4" />
               </button>
 
+              {/* 1-Click All-Out Strike Button */}
+              <button
+                onClick={handleAllOutStrike}
+                disabled={!isMyTurn || readyMinionsCount === 0}
+                className={`py-2 px-4 sm:px-5 rounded-xl font-black font-display text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-lg transition transform active:scale-95 ${
+                  isMyTurn && readyMinionsCount > 0
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-400 hover:from-emerald-400 hover:to-white text-slate-950 shadow-emerald-500/30 border-2 border-white animate-pulse'
+                    : 'bg-slate-900/80 text-slate-600 border border-slate-800/80 cursor-not-allowed'
+                }`}
+                title="Automatically command all ready heroes to attack enemy"
+              >
+                <Zap className="w-3.5 h-3.5 fill-current" />
+                <span>⚔️ Strike ({readyMinionsCount})</span>
+              </button>
+
+              {/* End Turn Button */}
               <button
                 onClick={() => {
                   soundFX.playCardPlay();
                   onEndTurn();
                 }}
                 disabled={!isMyTurn}
-                className={`py-2.5 px-6 rounded-xl font-black font-display text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition transform active:scale-95 ${
+                className={`py-2 px-5 sm:px-6 rounded-xl font-black font-display text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition transform active:scale-95 ${
                   isMyTurn
                     ? 'bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-arena-cyan hover:to-white text-slate-950 shadow-arena-cyan/20 border-2 border-white'
                     : 'bg-slate-900 text-slate-600 border border-slate-800 cursor-not-allowed'

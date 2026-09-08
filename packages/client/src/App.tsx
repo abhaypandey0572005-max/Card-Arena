@@ -6,6 +6,7 @@ import { DeckStudio } from './components/DeckStudio.js';
 import { CustomDeckBuilder } from './components/CustomDeckBuilder.js';
 import { LeaderboardModal } from './components/LeaderboardModal.js';
 import { FounderModal } from './components/FounderModal.js';
+import { UniverseSelectorModal, UNIVERSES } from './components/UniverseSelector.js';
 import { Lobby } from './components/Lobby.js';
 import { MatchmakingRadar } from './components/MatchmakingRadar.js';
 import { FriendRoomModal } from './components/FriendRoomModal.js';
@@ -46,8 +47,11 @@ export const App: React.FC = () => {
   const [showFriendModal, setShowFriendModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showFounder, setShowFounder] = useState(false);
+  const [showUniverseModal, setShowUniverseModal] = useState(false);
   const [initialUrlRoomCode, setInitialUrlRoomCode] = useState<string>('');
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => loadPlayerStats(currentPlayerName));
+
+  const currentUniverse = UNIVERSES.find((u) => u.id === selectedDeckId) || UNIVERSES[0];
 
   const {
     isConnected,
@@ -108,11 +112,12 @@ export const App: React.FC = () => {
     joinQueue(currentPlayerName, 'cyber-runner', selectedDeckId);
   };
 
-  const handlePlayVsAi = () => {
+  // STRICT UNIVERSE VS UNIVERSE (Marvel vs Marvel, DC vs DC, Pokemon vs Pokemon, etc.)
+  const handlePlayVsAi = (universeDeckId?: string) => {
     soundFX.playCardPlay();
-    const aiDeckOptions = ['marvel-avengers', 'anime-allstars', 'pokemon-champions', 'wwe-legends', 'dc-justice'];
-    const randomAiDeck = aiDeckOptions[Math.floor(Math.random() * aiDeckOptions.length)];
-    startAiMatch(currentPlayerName, 'cyber-runner', selectedDeckId, randomAiDeck);
+    const deckToUse = universeDeckId || selectedDeckId;
+    startAiMatch(currentPlayerName, 'cyber-runner', deckToUse, deckToUse);
+    setShowUniverseModal(false);
   };
 
   const getMyPlayerId = (): string => {
@@ -227,6 +232,20 @@ export const App: React.FC = () => {
             </span>
           </button>
 
+          {/* Realm Switcher in Nav */}
+          <button
+            onClick={() => {
+              soundFX.playCardHover();
+              setShowUniverseModal(true);
+            }}
+            className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-arena-cyan border border-arena-cyan/40 hover:border-arena-cyan transition flex items-center gap-1.5 shadow-sm group"
+            title="Switch Battle Universe (Marvel, DC, Pokemon, Anime, WWE)"
+          >
+            <span className="text-xs font-black uppercase font-cinzel tracking-wider group-hover:text-white">
+              ⚔️ {currentUniverse.name}
+            </span>
+          </button>
+
           {/* Leaderboard Button */}
           <button
             onClick={() => {
@@ -336,13 +355,24 @@ export const App: React.FC = () => {
         ) : (
           <LandingHero
             onQuickMatch={handleQuickMatch}
-            onPlayVsAi={handlePlayVsAi}
+            onPlayVsAi={() => handlePlayVsAi(selectedDeckId)}
             onPlayWithFriends={() => setShowFriendModal(true)}
             onOpenDeckStudio={() => setViewMode('custom-decks')}
             onOpenFounder={() => setShowFounder(true)}
+            selectedUniverseName={currentUniverse.name}
+            onOpenUniverseSelector={() => setShowUniverseModal(true)}
           />
         )}
       </main>
+
+      {/* Battle Universe Selector Modal */}
+      <UniverseSelectorModal
+        isOpen={showUniverseModal}
+        selectedUniverseId={selectedDeckId}
+        onSelect={(deckId) => setSelectedDeckId(deckId)}
+        onClose={() => setShowUniverseModal(false)}
+        onStartAi={handlePlayVsAi}
+      />
 
       {/* Founder Modal */}
       {showFounder && (

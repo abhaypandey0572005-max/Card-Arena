@@ -21,6 +21,8 @@ interface LandingHeroProps {
   onPlayWithFriends: () => void;
   onOpenDeckStudio: () => void;
   onOpenFounder?: () => void;
+  selectedUniverseName?: string;
+  onOpenUniverseSelector: () => void;
 }
 
 export const LandingHero: React.FC<LandingHeroProps> = ({
@@ -29,6 +31,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
   onPlayWithFriends,
   onOpenDeckStudio,
   onOpenFounder,
+  selectedUniverseName,
+  onOpenUniverseSelector,
 }) => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -83,8 +87,34 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             Battle with iconic characters across <strong className="text-arena-cyan">Marvel</strong>, <strong className="text-arena-blue">DC</strong>, <strong className="text-amber-400">Pokemon</strong>, <strong className="text-rose-400">WWE</strong>, and <strong className="text-yellow-300">Anime</strong>. Play online PvP, invite friends directly, or challenge the AI Bot!
           </p>
 
+          {/* Current Battle Realm Selector Banner */}
+          <div 
+            onClick={() => {
+              soundFX.playCardPlay();
+              onOpenUniverseSelector();
+            }}
+            className="w-full max-w-md p-3.5 rounded-2xl bg-gradient-to-r from-red-950/80 via-blue-950/80 to-purple-950/80 border-2 border-arena-cyan/70 hover:border-white shadow-xl shadow-arena-cyan/20 cursor-pointer flex items-center justify-between group transition transform hover:scale-[1.02] mt-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-arena-cyan/20 border border-arena-cyan flex items-center justify-center text-xl shadow">
+                ⚔️
+              </div>
+              <div className="text-left">
+                <span className="text-[10px] font-black uppercase tracking-wider text-arena-cyan block">
+                  Current Battle Realm (Click to Switch)
+                </span>
+                <h3 className="text-base font-black text-white font-cinzel group-hover:text-arena-cyan transition">
+                  {selectedUniverseName || 'Marvel vs Marvel'}
+                </h3>
+              </div>
+            </div>
+            <span className="text-xs font-black px-3 py-1 rounded-xl bg-white/10 text-slate-200 border border-white/20 group-hover:bg-arena-cyan group-hover:text-slate-950 transition">
+              Change Realm ➔
+            </span>
+          </div>
+
           {/* Action Matrix Buttons */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-8 w-full sm:w-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-5 w-full sm:w-auto">
             {/* Quick Match (PvP) */}
             <button
               onClick={() => {

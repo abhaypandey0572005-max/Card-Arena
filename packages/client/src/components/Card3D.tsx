@@ -147,6 +147,25 @@ export const Card3D: React.FC<Card3DProps> = ({
           }}
         />
 
+        {/* Action Status Banners for Maximum Clarity */}
+        {isAttackerReady && (
+          <div className="absolute top-1.5 left-2 right-2 z-30 bg-emerald-400 text-slate-950 font-black text-[9px] tracking-wider py-0.5 rounded-full text-center shadow-lg shadow-emerald-500/40 animate-pulse border border-white">
+            🟢 READY TO ATTACK
+          </div>
+        )}
+
+        {isTargetable && (
+          <div className="absolute top-1.5 left-2 right-2 z-30 bg-rose-600 text-white font-black text-[9px] tracking-wider py-0.5 rounded-full text-center shadow-lg shadow-rose-600/40 animate-bounce border border-white">
+            🎯 CLICK TO STRIKE!
+          </div>
+        )}
+
+        {!isAttackerReady && instance && instance.attacksThisTurn === 0 && !instance.canAttack && (
+          <div className="absolute top-1.5 left-2 right-2 z-30 bg-slate-900/95 border border-slate-700 text-slate-300 font-bold text-[8px] py-0.5 rounded-full text-center shadow">
+            💤 Resting (Ready Next Turn)
+          </div>
+        )}
+
         {/* Top Header: Energy Crystal & Rarity/Traits */}
         <div className="relative z-10 flex items-start justify-between">
           <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-arena-blue to-arena-cyan border-2 border-white flex items-center justify-center font-black text-white text-sm shadow-md">

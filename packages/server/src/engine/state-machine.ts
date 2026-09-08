@@ -15,6 +15,7 @@ const MAX_HAND_SIZE = 7;
 const MAX_BOARD_SIZE = 6;
 const MAX_MANA = 10;
 const INITIAL_HP = 30;
+const INITIAL_MANA = 3;
 const TURN_DURATION_SECONDS = 30;
 
 export interface PlayerInitConfig {
@@ -82,8 +83,8 @@ export function createInitialGameState(
       rating: p1Config.rating,
       hp: INITIAL_HP,
       maxHp: INITIAL_HP,
-      mana: 1,
-      maxMana: 1,
+      mana: INITIAL_MANA,
+      maxMana: INITIAL_MANA,
       shield: 0,
       hand: p1Hand,
       board: [],
@@ -100,7 +101,7 @@ export function createInitialGameState(
       hp: INITIAL_HP,
       maxHp: INITIAL_HP,
       mana: 0,
-      maxMana: 0,
+      maxMana: INITIAL_MANA - 1,
       shield: 0,
       hand: p2Hand,
       board: [],
