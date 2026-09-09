@@ -161,10 +161,16 @@ realtime-card-game/
 - Smart AI counter picking algorithm saving high-power cards.
 - Screen shake and 3D clash presentation.
 
-### v1.4 — 12 Cards per Universe & Dynamic Turn Initiative (Current)
+### v1.4 — 12 Cards per Universe & Dynamic Turn Initiative
 - Expanded all 5 universes to exactly 12 cards with balanced stats and local HD artwork.
 - Implemented "Loser Plays First" dynamic initiative where the loser of each round is forced to lead, giving the winner the counter advantage.
 - Clean build across all packages and synced with GitHub `origin/main`.
+
+### v1.5 — Player Authentication & Founder Profile Integration (Current)
+- Built cinematic **LoginPage** with Username & Password authentication, Remember Me session persistence, and custom Champion Avatar selection.
+- Created local authentication engine (`auth.ts`) with account creation, password validation, and seeded Founder account.
+- Enhanced **Founder Section** (`FounderModal.tsx` + Spotlight Card on Login Page) with comprehensive details of **Abhay Pandey** (Founder & Lead Architect, GitHub profile, project repository, direct contact email, and full-stack technical contributions).
+- Added navbar login badge showing active username, online status, and seamless account sign-out / switching.
 
 ---
 

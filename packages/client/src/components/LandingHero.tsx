@@ -21,6 +21,9 @@ interface LandingHeroProps {
   onPlayWithFriends: () => void;
   onOpenDeckStudio: () => void;
   onOpenFounder?: () => void;
+  onOpenLogin?: () => void;
+  currentPlayerName?: string;
+  isLoggedIn?: boolean;
   selectedUniverseName?: string;
   onOpenUniverseSelector: () => void;
 }
@@ -31,6 +34,9 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
   onPlayWithFriends,
   onOpenDeckStudio,
   onOpenFounder,
+  onOpenLogin,
+  currentPlayerName,
+  isLoggedIn = false,
   selectedUniverseName,
   onOpenUniverseSelector,
 }) => {
@@ -55,7 +61,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
   return (
     <div className="relative min-h-[calc(100vh-80px)] flex flex-col items-center justify-between px-4 py-6 overflow-hidden z-10">
       {/* Top Ticker: Live Players Online */}
-      <div className="flex items-center gap-3 px-4 py-1.5 rounded-full glass-panel border border-arena-cyan/30 shadow-lg shadow-arena-cyan/10 animate-fade-in">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 px-4 py-1.5 rounded-full glass-panel border border-arena-cyan/30 shadow-lg shadow-arena-cyan/10 animate-fade-in">
         <div className="relative flex items-center justify-center">
           <span className="w-2.5 h-2.5 rounded-full bg-arena-cyan animate-ping absolute" />
           <span className="w-2 h-2 rounded-full bg-arena-cyan" />
@@ -63,8 +69,29 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
         <span className="text-xs font-black uppercase tracking-widest text-arena-cyan flex items-center gap-1.5">
           <Radio className="w-3.5 h-3.5" /> 1,284 PLAYERS ONLINE
         </span>
-        <span className="text-slate-600">|</span>
-        <span className="text-xs font-bold text-slate-400">MARVEL • DC • POKEMON • WWE • ANIME</span>
+        <span className="text-slate-600 hidden sm:inline">|</span>
+        <span className="text-xs font-bold text-slate-400 hidden sm:inline">MARVEL • DC • POKEMON • WWE • ANIME</span>
+        {onOpenLogin && (
+          <>
+            <span className="text-slate-600">|</span>
+            {isLoggedIn ? (
+              <span className="text-xs font-black text-emerald-400 flex items-center gap-1">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                {currentPlayerName}
+              </span>
+            ) : (
+              <button
+                onClick={() => {
+                  soundFX.playCardHover();
+                  onOpenLogin();
+                }}
+                className="text-xs font-black uppercase tracking-wider text-amber-300 hover:text-white transition flex items-center gap-1 cursor-pointer"
+              >
+                <span>🔑 Sign In</span>
+              </button>
+            )}
+          </>
+        )}
       </div>
 
       {/* Center Stage */}

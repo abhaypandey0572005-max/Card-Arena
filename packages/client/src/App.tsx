@@ -6,6 +6,7 @@ import { DeckStudio } from './components/DeckStudio.js';
 import { CustomDeckBuilder } from './components/CustomDeckBuilder.js';
 import { LeaderboardModal } from './components/LeaderboardModal.js';
 import { FounderModal } from './components/FounderModal.js';
+import { LoginPage } from './components/LoginPage.js';
 import { UniverseSelectorModal, UNIVERSES } from './components/UniverseSelector.js';
 import { ShowdownArena } from './components/ShowdownArena.js';
 import { Lobby } from './components/Lobby.js';
@@ -15,6 +16,7 @@ import { Battlefield } from './components/Battlefield.js';
 import { GameOverModal } from './components/GameOverModal.js';
 import { soundFX } from './utils/audio.js';
 import { loadPlayerStats, PlayerStats } from './utils/ranks.js';
+import { getCurrentUser, logoutUser, UserAccount } from './utils/auth.js';
 import { 
   Sun, 
   Moon, 
@@ -27,11 +29,13 @@ import {
   Users,
   Trophy,
   Sparkles,
-  Crown
+  Crown,
+  User as UserIcon,
+  LogOut
 } from 'lucide-react';
 import { PRESET_DECKS } from '@card-battler/shared';
 
-type ViewMode = 'landing' | 'deck-studio' | 'custom-decks' | 'lobby' | 'showdown';
+type ViewMode = 'landing' | 'login' | 'deck-studio' | 'custom-decks' | 'lobby' | 'showdown';
 
 export const App: React.FC = () => {
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -41,9 +45,12 @@ export const App: React.FC = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('landing');
   const [selectedDeckId, setSelectedDeckId] = useState<string>(PRESET_DECKS[0].id);
-  const [currentPlayerName, setCurrentPlayerName] = useState<string>(
-    () => `Pilot_${Math.floor(1000 + Math.random() * 9000)}`
-  );
+  const [currentUser, setCurrentUser] = useState<UserAccount | null>(() => getCurrentUser());
+  const [currentPlayerName, setCurrentPlayerName] = useState<string>(() => {
+    const user = getCurrentUser();
+    if (user) return user.username;
+    return `Pilot_${Math.floor(1000 + Math.random() * 9000)}`;
+  });
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [showFriendModal, setShowFriendModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
@@ -51,6 +58,22 @@ export const App: React.FC = () => {
   const [showUniverseModal, setShowUniverseModal] = useState(false);
   const [initialUrlRoomCode, setInitialUrlRoomCode] = useState<string>('');
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => loadPlayerStats(currentPlayerName));
+
+  const handleLoginSuccess = (user: UserAccount) => {
+    setCurrentUser(user);
+    setCurrentPlayerName(user.username);
+    setPlayerStats(loadPlayerStats(user.username));
+    setViewMode('landing');
+  };
+
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+    const guestName = `Pilot_${Math.floor(1000 + Math.random() * 9000)}`;
+    setCurrentPlayerName(guestName);
+    setPlayerStats(loadPlayerStats(guestName));
+    soundFX.playCardHover();
+  };
 
   const currentUniverse = UNIVERSES.find((u) => u.id === selectedDeckId) || UNIVERSES[0];
 
@@ -213,23 +236,73 @@ export const App: React.FC = () => {
             >
               Deck Studio
             </button>
+            <button
+              onClick={() => {
+                soundFX.playCardHover();
+                setViewMode('login');
+              }}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition flex items-center gap-1.5 ${
+                viewMode === 'login'
+                  ? 'bg-arena-cyan/20 text-arena-cyan border border-arena-cyan/50 shadow-sm'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <UserIcon className="w-3.5 h-3.5" />
+              {currentUser ? 'Account' : 'Sign In'}
+            </button>
           </nav>
         )}
 
         {/* Right Controls */}
         <div className="flex items-center gap-2">
+          {/* User Account / Sign In Badge */}
+          {currentUser ? (
+            <div className="flex items-center gap-2 p-1 pl-2.5 pr-1.5 rounded-xl bg-slate-900/90 border border-arena-cyan/50 shadow-md">
+              <div className="w-6 h-6 rounded-lg bg-arena-blue/30 border border-arena-cyan flex items-center justify-center text-xs">
+                👤
+              </div>
+              <div className="flex flex-col text-left">
+                <span className="text-[11px] font-black text-arena-cyan leading-tight truncate max-w-[80px] sm:max-w-[120px]">
+                  {currentUser.username}
+                </span>
+                <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">
+                  Active
+                </span>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="p-1 rounded-lg hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                title="Sign Out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => {
+                soundFX.playCardPlay();
+                setViewMode('login');
+              }}
+              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-arena-cyan/20 border border-white transition transform hover:scale-105 cursor-pointer"
+              title="Sign In / Register Account"
+            >
+              <UserIcon className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Sign In</span>
+            </button>
+          )}
+
           {/* Founder Button */}
           <button
             onClick={() => {
               soundFX.playCardHover();
               setShowFounder(true);
             }}
-            className="p-2 rounded-xl glass-panel text-arena-gold hover:text-white border border-amber-500/40 hover:border-arena-gold transition flex items-center gap-1.5 bg-amber-500/10"
-            title="Founder Profile — Abhay Pandey"
+            className="p-2 px-2.5 rounded-xl glass-panel text-amber-300 hover:text-white border border-amber-500/50 hover:border-amber-400 transition flex items-center gap-1.5 bg-amber-500/15 shadow-md shadow-amber-500/10 cursor-pointer"
+            title="Founder Dossier — Abhay Pandey"
           >
-            <Crown className="w-4 h-4 text-arena-gold" />
-            <span className="text-xs font-black uppercase tracking-wider hidden xl:inline">
-              Founder
+            <Crown className="w-4 h-4 text-amber-400" />
+            <span className="text-xs font-black uppercase tracking-wider hidden lg:inline">
+              Founder: Abhay
             </span>
           </button>
 
@@ -363,6 +436,12 @@ export const App: React.FC = () => {
             }}
             onLeaveQueue={leaveQueue}
           />
+        ) : viewMode === 'login' ? (
+          <LoginPage
+            onLoginSuccess={handleLoginSuccess}
+            onPlayAsGuest={() => setViewMode('landing')}
+            onOpenFounder={() => setShowFounder(true)}
+          />
         ) : (
           <LandingHero
             onQuickMatch={handleQuickMatch}
@@ -370,6 +449,9 @@ export const App: React.FC = () => {
             onPlayWithFriends={() => setShowFriendModal(true)}
             onOpenDeckStudio={() => setViewMode('custom-decks')}
             onOpenFounder={() => setShowFounder(true)}
+            onOpenLogin={() => setViewMode('login')}
+            currentPlayerName={currentPlayerName}
+            isLoggedIn={Boolean(currentUser)}
             selectedUniverseName={currentUniverse.name}
             onOpenUniverseSelector={() => setShowUniverseModal(true)}
           />
