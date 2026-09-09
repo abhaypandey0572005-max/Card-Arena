@@ -146,19 +146,8 @@ export const FounderModal: React.FC<FounderModalProps> = ({ onClose }) => {
           </a>
 
           <a
-            href="https://github.com/abhaypandey0572005-max/Card-Arena"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-arena-cyan text-white text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 transition group"
-          >
-            <Code2 className="w-4 h-4 text-arena-cyan" />
-            <span>Card Arena Repo</span>
-            <ExternalLink className="w-3 h-3 text-slate-500 group-hover:text-arena-cyan transition" />
-          </a>
-
-          <a
             href="mailto:abhaypandey0572005@gmail.com"
-            className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-white text-slate-950 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 border border-white transition transform hover:scale-102"
+            className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-white text-slate-950 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 border border-white transition transform hover:scale-102 cursor-pointer"
           >
             <Mail className="w-4 h-4 text-slate-950" />
             <span>Contact Abhay</span>
