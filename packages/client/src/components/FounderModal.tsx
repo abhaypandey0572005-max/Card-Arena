@@ -146,11 +146,15 @@ export const FounderModal: React.FC<FounderModalProps> = ({ onClose }) => {
           </a>
 
           <a
-            href="mailto:abhaypandey0572005@gmail.com"
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=abhaypandey0572005@gmail.com&su=Hello%20Abhay%20-%20Card%20Arena"
+            target="_blank"
+            rel="noopener noreferrer"
             className="w-full sm:flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-white text-slate-950 text-xs font-black uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 border border-white transition transform hover:scale-102 cursor-pointer"
+            title="Open Gmail to email Abhay"
           >
             <Mail className="w-4 h-4 text-slate-950" />
-            <span>Contact Abhay</span>
+            <span>Contact Abhay (Gmail)</span>
+            <ExternalLink className="w-3.5 h-3.5 text-slate-950/70" />
           </a>
         </div>
       </div>

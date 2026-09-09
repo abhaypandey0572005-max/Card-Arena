@@ -413,11 +413,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({
               </a>
 
               <a
-                href="mailto:abhaypandey0572005@gmail.com"
-                className="py-2.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-white text-xs font-bold transition flex items-center gap-1.5"
-                title="Send Email to Abhay"
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=abhaypandey0572005@gmail.com&su=Hello%20Abhay%20-%20Card%20Arena"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2.5 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-amber-400 text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+                title="Send Email to Abhay via Gmail"
               >
                 <Mail className="w-3.5 h-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Gmail</span>
               </a>
             </div>
           </div>
