@@ -113,14 +113,21 @@ export const App: React.FC = () => {
     endTurn,
     surrender,
     resetMatchState,
+    showdownMatch,
+    showdownAction,
+    sendShowdownAction,
+    exitShowdownMatch,
   } = useGameSocket();
 
   // Close friend room modal immediately once match is established
   useEffect(() => {
-    if (gameState) {
+    if (gameState || showdownMatch) {
       setShowFriendModal(false);
+      if (showdownMatch) {
+        setViewMode('showdown');
+      }
     }
-  }, [gameState]);
+  }, [gameState, showdownMatch]);
 
   // Read URL query param ?room=ARENA-XXXX for instant friend joins
   useEffect(() => {
@@ -235,6 +242,35 @@ export const App: React.FC = () => {
 
   const opponentPlayerId = gameState?.playerOrder.find((id) => id !== myPlayerId);
   const opponentName = opponentPlayerId ? gameState?.players[opponentPlayerId]?.name : 'Chrono AI (Bot)';
+
+  const isRoomShowdownHost = showdownMatch
+    ? serverPlayerId === showdownMatch.hostPlayerId ||
+      currentPlayerName === showdownMatch.hostPlayerName
+    : false;
+
+  const roomShowdownUniverseId = showdownMatch
+    ? isRoomShowdownHost
+      ? showdownMatch.hostDeckId
+      : showdownMatch.guestDeckId
+    : selectedDeckId;
+
+  const roomShowdownOpponentUniverseId = showdownMatch
+    ? isRoomShowdownHost
+      ? showdownMatch.guestDeckId
+      : showdownMatch.hostDeckId
+    : undefined;
+
+  const roomShowdownOpponentName = showdownMatch
+    ? isRoomShowdownHost
+      ? showdownMatch.guestPlayerName
+      : showdownMatch.hostPlayerName
+    : quickMatchOpponent;
+
+  const roomShowdownStartingLeader = showdownMatch
+    ? isRoomShowdownHost
+      ? ('player' as const)
+      : ('opponent' as const)
+    : ('player' as const);
 
   return (
     <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-main)] flex flex-col justify-between relative transition-colors duration-500">
@@ -493,17 +529,30 @@ export const App: React.FC = () => {
             }}
             onCancelQueue={handleCancelQuickMatch}
           />
-        ) : viewMode === 'showdown' ? (
+        ) : viewMode === 'showdown' || showdownMatch ? (
           <ShowdownArena
-            universeId={selectedDeckId}
+            universeId={showdownMatch ? roomShowdownUniverseId : selectedDeckId}
+            opponentUniverseId={roomShowdownOpponentUniverseId}
             playerName={currentPlayerName}
             isQuickMatch={isQuickMatchMode}
-            opponentName={quickMatchOpponent}
+            isMultiplayer={Boolean(showdownMatch)}
+            isHost={isRoomShowdownHost}
+            roomId={showdownMatch?.roomId}
+            startingLeader={roomShowdownStartingLeader}
+            onSendShowdownAction={sendShowdownAction}
+            incomingShowdownAction={showdownAction}
+            opponentName={roomShowdownOpponentName}
             onExit={() => {
+              if (showdownMatch) {
+                exitShowdownMatch();
+              }
               setIsQuickMatchMode(false);
               setViewMode('landing');
             }}
             onChangeUniverse={() => {
+              if (showdownMatch) {
+                exitShowdownMatch();
+              }
               setIsQuickMatchMode(false);
               setViewMode('landing');
               setShowUniverseModal(true);

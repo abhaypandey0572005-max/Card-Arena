@@ -32,6 +32,15 @@ export class GatewayService {
   private gameEngine: GameEngineService;
   private clients = new Map<string, ExtendedWebSocket>();
   private customLobbies = new Map<string, CustomLobby>();
+  private activeShowdownRooms = new Map<string, {
+    roomId: string;
+    hostSocketId: string;
+    guestSocketId: string;
+    hostPlayerId: string;
+    guestPlayerId: string;
+    hostDeckId: string;
+    guestDeckId: string;
+  }>();
   private heartbeatInterval: NodeJS.Timeout | null = null;
   private outboundUnsub: (() => void) | null = null;
 
@@ -313,26 +322,70 @@ export class GatewayService {
                 return;
               }
 
-              await this.gameEngine.createCustomMatch(
-                {
-                  id: lobby.host.playerId,
-                  name: lobby.host.playerName,
-                  avatar: lobby.host.avatar,
-                  rating: 1200,
-                  deckId: lobby.host.deckId,
-                  socketId: lobby.host.socketId,
-                },
-                {
-                  id: lobby.guest.playerId,
-                  name: lobby.guest.playerName,
-                  avatar: lobby.guest.avatar,
-                  rating: 1200,
-                  deckId: lobby.guest.deckId,
-                  socketId: lobby.guest.socketId,
-                }
-              );
+              const roomId = `room_showdown_${Date.now()}`;
+              const hostWs = this.clients.get(lobby.host.socketId);
+              const guestWs = this.clients.get(lobby.guest.socketId);
+
+              if (hostWs) (hostWs as any).showdownRoomId = roomId;
+              if (guestWs) (guestWs as any).showdownRoomId = roomId;
+
+              this.activeShowdownRooms.set(roomId, {
+                roomId,
+                hostSocketId: lobby.host.socketId,
+                guestSocketId: lobby.guest.socketId,
+                hostPlayerId: lobby.host.playerId,
+                guestPlayerId: lobby.guest.playerId,
+                hostDeckId: lobby.host.deckId,
+                guestDeckId: lobby.guest.deckId,
+              });
+
+              const showdownPayload = {
+                roomId,
+                hostPlayerId: lobby.host.playerId,
+                hostPlayerName: lobby.host.playerName,
+                hostDeckId: lobby.host.deckId,
+                guestPlayerId: lobby.guest.playerId,
+                guestPlayerName: lobby.guest.playerName,
+                guestDeckId: lobby.guest.deckId,
+                startingLeader: 'host' as const,
+              };
+
+              if (hostWs) {
+                this.send(hostWs, {
+                  type: 'SHOWDOWN_START',
+                  payload: showdownPayload,
+                });
+              }
+
+              if (guestWs) {
+                this.send(guestWs, {
+                  type: 'SHOWDOWN_START',
+                  payload: showdownPayload,
+                });
+              }
 
               this.customLobbies.delete(lobby.roomCode);
+              break;
+            }
+
+            case 'SHOWDOWN_ACTION': {
+              const room = this.activeShowdownRooms.get(message.payload.roomId);
+              if (!room) return;
+
+              // Broadcast action to the other player in this showdown duel
+              const targetSocketId =
+                extWs.id === room.hostSocketId ? room.guestSocketId : room.hostSocketId;
+              const targetWs = this.clients.get(targetSocketId);
+
+              if (targetWs) {
+                this.send(targetWs, {
+                  type: 'SHOWDOWN_ACTION',
+                  payload: {
+                    ...message.payload,
+                    senderPlayerId: extWs.playerId,
+                  },
+                });
+              }
               break;
             }
 
@@ -454,6 +507,21 @@ export class GatewayService {
                 });
               }
             }
+          }
+        }
+
+        if ((extWs as any).showdownRoomId) {
+          const sRoom = this.activeShowdownRooms.get((extWs as any).showdownRoomId);
+          if (sRoom) {
+            const peerId = extWs.id === sRoom.hostSocketId ? sRoom.guestSocketId : sRoom.hostSocketId;
+            const peerWs = this.clients.get(peerId);
+            if (peerWs) {
+              this.send(peerWs, {
+                type: 'ERROR',
+                payload: { message: 'Opponent left the duel.' },
+              });
+            }
+            this.activeShowdownRooms.delete(sRoom.roomId);
           }
         }
 

@@ -51,24 +51,37 @@ function shuffle<T>(array: T[]): T[] {
 /**
  * Shuffles the universe deck and deals 5 cards each to player and opponent
  */
-export function initShowdownMatch(universeId: string = 'marvel-avengers'): ShowdownMatchState {
-  const preset = PRESET_DECKS.find((d) => d.id === universeId) || PRESET_DECKS[0];
+export function initShowdownMatch(
+  universeId: string = 'marvel-avengers',
+  opponentUniverseId?: string,
+  startingLeader: 'player' | 'opponent' = 'player'
+): ShowdownMatchState {
+  const playerPreset = PRESET_DECKS.find((d) => d.id === universeId) || PRESET_DECKS[0];
+  const oppPreset = opponentUniverseId
+    ? PRESET_DECKS.find((d) => d.id === opponentUniverseId) || PRESET_DECKS[0]
+    : playerPreset;
   
-  // Collect all card templates in this universe deck (minions with stats)
-  const fullDeck: CardTemplate[] = [];
-  for (const cardId of preset.cardIds) {
+  // Collect all card templates in player's universe deck
+  const playerFullDeck: CardTemplate[] = [];
+  for (const cardId of playerPreset.cardIds) {
     const template = CARD_DATABASE.find((c) => c.id === cardId);
     if (template && template.type === 'minion') {
-      fullDeck.push(template);
+      playerFullDeck.push(template);
+    }
+  }
+
+  // Collect all card templates in opponent's universe deck
+  const oppFullDeck: CardTemplate[] = [];
+  for (const cardId of oppPreset.cardIds) {
+    const template = CARD_DATABASE.find((c) => c.id === cardId);
+    if (template && template.type === 'minion') {
+      oppFullDeck.push(template);
     }
   }
 
   // Shuffle the universe cards
-  const shuffled = shuffle(fullDeck);
-
-  // Deal 5 random cards each from the 12-card universe deck
-  const playerHand = shuffled.slice(0, 5);
-  const opponentHand = shuffled.slice(5, 10);
+  const playerHand = shuffle(playerFullDeck).slice(0, 5);
+  const opponentHand = shuffle(oppFullDeck).slice(0, 5);
 
   return {
     universeId,
@@ -81,7 +94,7 @@ export function initShowdownMatch(universeId: string = 'marvel-avengers'): Showd
     playedPlayerCard: null,
     playedOpponentCard: null,
     lastClashResult: null,
-    currentLeader: 'player', // Round 1 starts with player leading
+    currentLeader: startingLeader,
     phase: 'player_turn',
     matchWinner: null,
   };

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CardTemplate } from '@card-battler/shared';
+import { CardTemplate, ShowdownActionPayload } from '@card-battler/shared';
 import { Card3D } from './Card3D.js';
 import { 
   ShowdownMatchState, 
@@ -31,26 +31,44 @@ import { recordMatchResult } from '../utils/ranks.js';
 
 interface ShowdownArenaProps {
   universeId: string;
+  opponentUniverseId?: string;
   playerName: string;
   opponentName?: string;
   isQuickMatch?: boolean;
+  isMultiplayer?: boolean;
+  isHost?: boolean;
+  roomId?: string;
+  startingLeader?: 'player' | 'opponent';
+  onSendShowdownAction?: (action: ShowdownActionPayload) => void;
+  incomingShowdownAction?: ShowdownActionPayload | null;
   onExit: () => void;
   onChangeUniverse: () => void;
 }
 
 export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
   universeId,
+  opponentUniverseId,
   playerName,
   opponentName,
   isQuickMatch = false,
+  isMultiplayer = false,
+  isHost = false,
+  roomId = '',
+  startingLeader = 'player',
+  onSendShowdownAction,
+  incomingShowdownAction,
   onExit,
   onChangeUniverse,
 }) => {
-  const opponentDisplayName = opponentName || (isQuickMatch ? 'Rival Pilot' : 'Computer (AI)');
-  const [match, setMatch] = useState<ShowdownMatchState>(() => initShowdownMatch(universeId));
+  const opponentDisplayName = opponentName || (isQuickMatch ? 'Rival Pilot' : isMultiplayer ? 'Friend Pilot' : 'Computer (AI)');
+  const [match, setMatch] = useState<ShowdownMatchState>(() =>
+    initShowdownMatch(universeId, opponentUniverseId, startingLeader)
+  );
   const [screenShake, setScreenShake] = useState(false);
   const [showStatBars, setShowStatBars] = useState(false);
   const [mmrResult, setMmrResult] = useState<{ newMmr: number; mmrChange: number } | null>(null);
+  const [rematchRequestedByPeer, setRematchRequestedByPeer] = useState(false);
+  const [rematchSent, setRematchSent] = useState(false);
 
   const universe = UNIVERSES.find((u) => u.id === universeId) || UNIVERSES[0];
 
@@ -59,8 +77,18 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
     setTimeout(() => setScreenShake(false), 450);
   };
 
-  // Automated AI Lead: When Computer lost last round, Computer must play first
+  // Re-sync match when roomId, universes, or startingLeader changes
   useEffect(() => {
+    if (isMultiplayer) {
+      setMatch(initShowdownMatch(universeId, opponentUniverseId, startingLeader));
+      setRematchRequestedByPeer(false);
+      setRematchSent(false);
+    }
+  }, [roomId, universeId, opponentUniverseId, startingLeader, isMultiplayer]);
+
+  // Automated AI Lead: When Computer lost last round, Computer must play first (Solo / AI mode only)
+  useEffect(() => {
+    if (isMultiplayer) return;
     if (
       match.currentLeader === 'opponent' &&
       !match.playedOpponentCard &&
@@ -83,98 +111,10 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
 
       return () => clearTimeout(timer);
     }
-  }, [match.round, match.currentLeader, match.playedOpponentCard, match.phase]);
+  }, [match.round, match.currentLeader, match.playedOpponentCard, match.phase, isMultiplayer]);
 
-  // When player plays a card from hand
-  const handlePlayCard = (card: CardTemplate) => {
-    if (match.phase !== 'player_turn') return;
-
-    const nextPlayerHand = match.playerHand.filter((c) => c.id !== card.id);
-
-    if (match.currentLeader === 'opponent') {
-      // ----------------------------------------------------
-      // CASE 1: Computer already led! Player is countering!
-      // ----------------------------------------------------
-      if (!match.playedOpponentCard) return; // Wait for computer to place lead
-
-      soundFX.playCardPlay();
-      soundFX.playAttack();
-      triggerShake();
-
-      const aiCard = match.playedOpponentCard;
-      const result: RoundClashResult = evaluateShowdownClash(card, aiCard);
-
-      if (result.winner === 'player') {
-        soundFX.playVictory();
-      } else if (result.winner === 'opponent') {
-        soundFX.playDamage();
-      }
-
-      setShowStatBars(true);
-
-      const nextPlayerScore = result.winner === 'player' ? match.playerScore + 1 : result.winner === 'tie' ? match.playerScore + 1 : match.playerScore;
-      const nextOpponentScore = result.winner === 'opponent' ? match.opponentScore + 1 : result.winner === 'tie' ? match.opponentScore + 1 : match.opponentScore;
-
-      setMatch((prev) => ({
-        ...prev,
-        playerHand: nextPlayerHand,
-        playedPlayerCard: card,
-        lastClashResult: result,
-        playerScore: nextPlayerScore,
-        opponentScore: nextOpponentScore,
-        phase: 'clash_reveal',
-      }));
-
-    } else {
-      // ----------------------------------------------------
-      // CASE 2: Player is leading! Computer will counter!
-      // ----------------------------------------------------
-      soundFX.playCardPlay();
-
-      setMatch((prev) => ({
-        ...prev,
-        playerHand: nextPlayerHand,
-        playedPlayerCard: card,
-        phase: 'opponent_thinking',
-      }));
-
-      // Computer thinks for 1.1 seconds, then plays counter card
-      setTimeout(() => {
-        const aiCard = chooseAiCounterCard(match.opponentHand, card);
-        const nextOpponentHand = match.opponentHand.filter((c) => c.id !== aiCard.id);
-
-        soundFX.playCardHover();
-        soundFX.playAttack();
-        triggerShake();
-
-        const result: RoundClashResult = evaluateShowdownClash(card, aiCard);
-
-        if (result.winner === 'player') {
-          soundFX.playVictory();
-        } else if (result.winner === 'opponent') {
-          soundFX.playDamage();
-        }
-
-        setShowStatBars(true);
-
-        const nextPlayerScore = result.winner === 'player' ? match.playerScore + 1 : result.winner === 'tie' ? match.playerScore + 1 : match.playerScore;
-        const nextOpponentScore = result.winner === 'opponent' ? match.opponentScore + 1 : result.winner === 'tie' ? match.opponentScore + 1 : match.opponentScore;
-
-        setMatch((prev) => ({
-          ...prev,
-          opponentHand: nextOpponentHand,
-          playedOpponentCard: aiCard,
-          lastClashResult: result,
-          playerScore: nextPlayerScore,
-          opponentScore: nextOpponentScore,
-          phase: 'clash_reveal',
-        }));
-      }, 1100);
-    }
-  };
-
-  // Next round transition with "Loser Plays First" logic
-  const handleNextRound = () => {
+  // Advance to next round locally with "Loser Leads" rule
+  const advanceRoundLocally = () => {
     soundFX.playCardPlay();
     setShowStatBars(false);
 
@@ -190,7 +130,8 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
       }
 
       if (isQuickMatch) {
-        const resultOutcome = matchWinner === 'player' ? 'win' : matchWinner === 'opponent' ? 'loss' : 'draw';
+        const resultOutcome =
+          matchWinner === 'player' ? 'win' : matchWinner === 'opponent' ? 'loss' : 'draw';
         const res = recordMatchResult(resultOutcome, opponentDisplayName, universe.name);
         setMmrResult(res);
       }
@@ -206,10 +147,10 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
       let nextLeader: 'player' | 'opponent';
 
       if (lastWinner === 'player') {
-        // Player won -> Computer lost -> Computer MUST play first!
+        // Player won -> Opponent lost -> Opponent MUST play first!
         nextLeader = 'opponent';
       } else if (lastWinner === 'opponent') {
-        // Computer won -> Player lost -> Player MUST play first!
+        // Opponent won -> Player lost -> Player MUST play first!
         nextLeader = 'player';
       } else {
         // Tie -> Alternate
@@ -228,11 +169,245 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
     }
   };
 
+  // Synchronize Multiplayer Peer Actions via WebSocket
+  useEffect(() => {
+    if (!isMultiplayer || !incomingShowdownAction) return;
+
+    const { action, card } = incomingShowdownAction;
+
+    if (action === 'PLAY_CARD' && card) {
+      if (match.currentLeader === 'opponent') {
+        // Case A: Peer was the leader and played their lead card
+        soundFX.playCardPlay();
+        const nextOpponentHand =
+          match.opponentHand.length > 1
+            ? match.opponentHand.slice(0, match.opponentHand.length - 1)
+            : [];
+
+        setMatch((prev) => ({
+          ...prev,
+          opponentHand: nextOpponentHand,
+          playedOpponentCard: card,
+          phase: 'player_turn', // Local player can now counter!
+        }));
+      } else {
+        // Case B: Peer was countering our lead card!
+        soundFX.playCardHover();
+        soundFX.playAttack();
+        triggerShake();
+
+        const nextOpponentHand =
+          match.opponentHand.length > 1
+            ? match.opponentHand.slice(0, match.opponentHand.length - 1)
+            : [];
+
+        if (match.playedPlayerCard) {
+          const result: RoundClashResult = evaluateShowdownClash(match.playedPlayerCard, card);
+
+          if (result.winner === 'player') {
+            soundFX.playVictory();
+          } else if (result.winner === 'opponent') {
+            soundFX.playDamage();
+          }
+
+          setShowStatBars(true);
+
+          const nextPlayerScore =
+            result.winner === 'player' || result.winner === 'tie'
+              ? match.playerScore + 1
+              : match.playerScore;
+          const nextOpponentScore =
+            result.winner === 'opponent' || result.winner === 'tie'
+              ? match.opponentScore + 1
+              : match.opponentScore;
+
+          setMatch((prev) => ({
+            ...prev,
+            opponentHand: nextOpponentHand,
+            playedOpponentCard: card,
+            lastClashResult: result,
+            playerScore: nextPlayerScore,
+            opponentScore: nextOpponentScore,
+            phase: 'clash_reveal',
+          }));
+        }
+      }
+    } else if (action === 'NEXT_ROUND') {
+      if (match.phase === 'clash_reveal') {
+        advanceRoundLocally();
+      }
+    } else if (action === 'REMATCH') {
+      setRematchRequestedByPeer(true);
+      soundFX.playVictory();
+    } else if (action === 'SURRENDER') {
+      soundFX.playVictory();
+      confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+      setMatch((prev) => ({
+        ...prev,
+        phase: 'match_ended',
+        matchWinner: 'player',
+        playerScore: Math.max(prev.playerScore, 3),
+      }));
+    }
+  }, [incomingShowdownAction, isMultiplayer, match.currentLeader, match.playedPlayerCard, match.phase]);
+
+  // When player plays a card from hand
+  const handlePlayCard = (card: CardTemplate) => {
+    if (match.phase !== 'player_turn') return;
+
+    const nextPlayerHand = match.playerHand.filter((c) => c.id !== card.id);
+
+    if (match.currentLeader === 'opponent') {
+      // ----------------------------------------------------
+      // CASE 1: Opponent already led! Player is countering!
+      // ----------------------------------------------------
+      if (!match.playedOpponentCard) return; // Wait for opponent to place lead
+
+      soundFX.playCardPlay();
+      soundFX.playAttack();
+      triggerShake();
+
+      const opponentCard = match.playedOpponentCard;
+      const result: RoundClashResult = evaluateShowdownClash(card, opponentCard);
+
+      if (result.winner === 'player') {
+        soundFX.playVictory();
+      } else if (result.winner === 'opponent') {
+        soundFX.playDamage();
+      }
+
+      setShowStatBars(true);
+
+      const nextPlayerScore =
+        result.winner === 'player' || result.winner === 'tie'
+          ? match.playerScore + 1
+          : match.playerScore;
+      const nextOpponentScore =
+        result.winner === 'opponent' || result.winner === 'tie'
+          ? match.opponentScore + 1
+          : match.opponentScore;
+
+      setMatch((prev) => ({
+        ...prev,
+        playerHand: nextPlayerHand,
+        playedPlayerCard: card,
+        lastClashResult: result,
+        playerScore: nextPlayerScore,
+        opponentScore: nextOpponentScore,
+        phase: 'clash_reveal',
+      }));
+
+      // Broadcast counter card in multiplayer
+      if (isMultiplayer && onSendShowdownAction) {
+        onSendShowdownAction({
+          roomId,
+          action: 'PLAY_CARD',
+          card,
+          round: match.round,
+        });
+      }
+
+    } else {
+      // ----------------------------------------------------
+      // CASE 2: Player is leading! Opponent will counter!
+      // ----------------------------------------------------
+      soundFX.playCardPlay();
+
+      setMatch((prev) => ({
+        ...prev,
+        playerHand: nextPlayerHand,
+        playedPlayerCard: card,
+        phase: 'opponent_thinking',
+      }));
+
+      if (isMultiplayer) {
+        // Broadcast lead card to opponent
+        onSendShowdownAction?.({
+          roomId,
+          action: 'PLAY_CARD',
+          card,
+          round: match.round,
+        });
+      } else {
+        // Computer AI calculates counter after short thinking delay
+        setTimeout(() => {
+          const aiCard = chooseAiCounterCard(match.opponentHand, card);
+          const nextOpponentHand = match.opponentHand.filter((c) => c.id !== aiCard.id);
+
+          soundFX.playCardHover();
+          soundFX.playAttack();
+          triggerShake();
+
+          const result: RoundClashResult = evaluateShowdownClash(card, aiCard);
+
+          if (result.winner === 'player') {
+            soundFX.playVictory();
+          } else if (result.winner === 'opponent') {
+            soundFX.playDamage();
+          }
+
+          setShowStatBars(true);
+
+          const nextPlayerScore =
+            result.winner === 'player' || result.winner === 'tie'
+              ? match.playerScore + 1
+              : match.playerScore;
+          const nextOpponentScore =
+            result.winner === 'opponent' || result.winner === 'tie'
+              ? match.opponentScore + 1
+              : match.opponentScore;
+
+          setMatch((prev) => ({
+            ...prev,
+            opponentHand: nextOpponentHand,
+            playedOpponentCard: aiCard,
+            lastClashResult: result,
+            playerScore: nextPlayerScore,
+            opponentScore: nextOpponentScore,
+            phase: 'clash_reveal',
+          }));
+        }, 1100);
+      }
+    }
+  };
+
+  // Next round transition with "Loser Plays First" logic
+  const handleNextRound = () => {
+    if (isMultiplayer) {
+      onSendShowdownAction?.({
+        roomId,
+        action: 'NEXT_ROUND',
+        round: match.round,
+      });
+    }
+    advanceRoundLocally();
+  };
+
   // Restart match with fresh 5 cards
   const handleRematch = () => {
     soundFX.playCardPlay();
     setShowStatBars(false);
-    setMatch(initShowdownMatch(universeId));
+    setRematchRequestedByPeer(false);
+    setRematchSent(true);
+
+    if (isMultiplayer) {
+      onSendShowdownAction?.({
+        roomId,
+        action: 'REMATCH',
+      });
+    }
+    setMatch(initShowdownMatch(universeId, opponentUniverseId, startingLeader));
+  };
+
+  // Exit match cleanly
+  const handleExit = () => {
+    if (isMultiplayer && match.phase !== 'match_ended') {
+      onSendShowdownAction?.({
+        roomId,
+        action: 'SURRENDER',
+      });
+    }
+    onExit();
   };
 
   const result = match.lastClashResult;
@@ -246,22 +421,26 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
         {/* Opponent Info */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
           <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl ${
-            isQuickMatch
+            isQuickMatch || isMultiplayer
               ? 'bg-gradient-to-br from-indigo-950 to-purple-950 border border-purple-500/80 text-purple-300'
               : 'bg-red-950/80 border border-red-500/80 text-red-400'
           } flex items-center justify-center font-black shadow-md shrink-0`}>
-            {isQuickMatch ? <Swords className="w-4 h-4 sm:w-5 sm:h-5" /> : <Bot className="w-4 h-4 sm:w-5 sm:h-5" />}
+            {isQuickMatch || isMultiplayer ? <Swords className="w-4 h-4 sm:w-5 sm:h-5" /> : <Bot className="w-4 h-4 sm:w-5 sm:h-5" />}
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1">
-              <span className={`text-[9px] sm:text-[10px] font-black uppercase ${isQuickMatch ? 'text-purple-300' : 'text-red-400'} block tracking-wider truncate`}>
+              <span className={`text-[9px] sm:text-[10px] font-black uppercase ${isQuickMatch || isMultiplayer ? 'text-purple-300' : 'text-red-400'} block tracking-wider truncate`}>
                 {opponentDisplayName}
               </span>
-              {isQuickMatch && (
+              {isMultiplayer ? (
+                <span className="px-1 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-400/40 text-[7px] font-mono font-bold shrink-0">
+                  ● ROOM
+                </span>
+              ) : isQuickMatch ? (
                 <span className="px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[7px] font-mono font-bold shrink-0">
                   ● PvP
                 </span>
-              )}
+              ) : null}
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-lg sm:text-2xl font-black font-cinzel text-white">
@@ -346,8 +525,12 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                 </span>
               ) : (
                 <span className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-red-500/20 border border-red-500 text-red-300 font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider shadow-lg inline-flex items-center gap-1.5 sm:gap-2">
-                  {isQuickMatch ? <Swords className="w-3.5 h-3.5 text-purple-400 shrink-0" /> : <Bot className="w-3.5 h-3.5 text-red-400 shrink-0" />}
-                  <span>{opponentDisplayName} lost last round and is picking lead...</span>
+                  <Swords className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                  <span>
+                    {isMultiplayer 
+                      ? `${opponentDisplayName} lost last round and is playing first...` 
+                      : `${opponentDisplayName} lost last round and is picking lead...`}
+                  </span>
                 </span>
               )
             ) : (
@@ -356,6 +539,16 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                 <span>⚔️ YOUR LEAD: Pick 1 card below to play!</span>
               </span>
             )}
+          </div>
+        )}
+
+        {/* Dynamic Waiting for Opponent Counter Banner */}
+        {match.phase === 'opponent_thinking' && (
+          <div className="text-center mb-2 sm:mb-3 px-2">
+            <span className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-amber-500/20 border border-amber-500 text-amber-300 font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider shadow-lg inline-flex items-center gap-1.5 sm:gap-2">
+              <div className="w-3.5 h-3.5 rounded-full border-2 border-amber-400 border-t-transparent animate-spin shrink-0" />
+              <span>You played! Waiting for {opponentDisplayName} to counter...</span>
+            </span>
           </div>
         )}
 
@@ -385,9 +578,9 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
             <div className="order-2 md:order-2 flex items-center justify-center px-1 sm:px-2">
               {match.phase === 'opponent_thinking' ? (
                 <div className="flex flex-col items-center gap-1 text-center animate-pulse py-2">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 sm:border-4 border-t-red-500 border-slate-700 animate-spin" />
-                  <span className="text-[9px] sm:text-xs font-black text-red-400 uppercase tracking-wider">
-                    AI Thinking...
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 sm:border-4 border-t-amber-500 border-slate-700 animate-spin" />
+                  <span className="text-[9px] sm:text-xs font-black text-amber-400 uppercase tracking-wider">
+                    {isMultiplayer ? 'Countering...' : 'AI Thinking...'}
                   </span>
                 </div>
               ) : (
@@ -400,8 +593,8 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
 
           {/* Opponent Card Pedestal (Right / order-2 or order-3) */}
           <div className={`${match.phase === 'clash_reveal' ? 'order-2 md:order-3' : 'order-3'} flex flex-col items-center`}>
-            <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider ${isQuickMatch ? 'text-purple-400' : 'text-red-400'} mb-1 flex items-center gap-1`}>
-              {isQuickMatch ? <Swords className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Bot className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+            <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider ${isQuickMatch || isMultiplayer ? 'text-purple-400' : 'text-red-400'} mb-1 flex items-center gap-1`}>
+              {isQuickMatch || isMultiplayer ? <Swords className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Bot className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
               {match.currentLeader === 'opponent' ? `${opponentDisplayName} Lead` : `${opponentDisplayName} Counter`}
             </span>
             {match.playedOpponentCard ? (
@@ -410,7 +603,7 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
               </div>
             ) : (
               <div className="w-28 h-44 sm:w-36 sm:h-56 md:w-44 md:h-68 lg:w-48 lg:h-72 rounded-2xl border-2 border-dashed border-red-500/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-[10px] sm:text-xs font-bold gap-1.5 text-center p-2 sm:p-4">
-                <span className="text-2xl sm:text-3xl opacity-40">{isQuickMatch ? '⚔️' : '🤖'}</span>
+                <span className="text-2xl sm:text-3xl opacity-40">{isQuickMatch || isMultiplayer ? '⚔️' : '🤖'}</span>
                 <span className="px-1">{match.currentLeader === 'opponent' ? `${opponentDisplayName} Choosing...` : `Awaiting ${opponentDisplayName} Counter`}</span>
               </div>
             )}
@@ -491,17 +684,17 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                 <div className="text-[9px] sm:text-[10px] text-slate-400 font-bold tracking-wide uppercase text-center">
                   {match.round < match.maxRounds && (
                     result.winner === 'player'
-                      ? `🤖 Loser Leads: ${opponentDisplayName} must play first next round!`
+                      ? `⚔️ Loser Leads: ${opponentDisplayName} must play first next round!`
                       : result.winner === 'opponent'
                       ? '⚔️ Loser Leads: You must play first next round!'
                       : '🤝 Tied: Turn initiative alternates!'
                   )}
                 </div>
 
-                {/* Next Round Button */}
+                {/* Next Round Button - Generous 46px+ Touch Target */}
                 <button
                   onClick={handleNextRound}
-                  className="w-full py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-102 active:scale-95 border border-white cursor-pointer"
+                  className="w-full min-h-[46px] py-2.5 sm:py-3 px-4 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-102 active:scale-95 border border-white cursor-pointer touch-manipulation"
                 >
                   <span>{match.round >= match.maxRounds ? 'View Final Results ➔' : 'Next Round ➔'}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -597,24 +790,36 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
             <div className="flex flex-col gap-2.5 w-full">
               <button
                 onClick={handleRematch}
-                className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-arena-cyan/30 transition transform hover:scale-105 active:scale-95 border border-white cursor-pointer"
+                className={`w-full min-h-[48px] py-3.5 px-6 rounded-xl font-black text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-102 active:scale-95 border border-white cursor-pointer touch-manipulation ${
+                  rematchRequestedByPeer
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 shadow-emerald-500/30 animate-pulse'
+                    : rematchSent
+                    ? 'bg-slate-800 text-slate-300 border-slate-600'
+                    : 'bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 shadow-arena-cyan/30'
+                }`}
               >
                 <RotateCcw className="w-4 h-4" />
-                Play Again (Same Realm)
+                {rematchRequestedByPeer
+                  ? `⚔️ ${opponentDisplayName} Requested Rematch! Accept Now`
+                  : rematchSent
+                  ? 'Rematch Request Sent... Play Again'
+                  : 'Play Again (Same Realm)'}
               </button>
 
-              <button
-                onClick={() => {
-                  onChangeUniverse();
-                }}
-                className="w-full py-3 px-6 rounded-xl glass-panel border border-slate-700 hover:border-arena-cyan text-slate-200 font-bold text-sm uppercase tracking-wider transition cursor-pointer"
-              >
-                Change Battle Universe
-              </button>
+              {!isMultiplayer && (
+                <button
+                  onClick={() => {
+                    onChangeUniverse();
+                  }}
+                  className="w-full min-h-[44px] py-3 px-6 rounded-xl glass-panel border border-slate-700 hover:border-arena-cyan text-slate-200 font-bold text-sm uppercase tracking-wider transition cursor-pointer touch-manipulation"
+                >
+                  Change Battle Universe
+                </button>
+              )}
 
               <button
-                onClick={onExit}
-                className="w-full py-2.5 px-6 text-slate-500 hover:text-slate-300 font-bold text-xs uppercase tracking-wider transition cursor-pointer"
+                onClick={handleExit}
+                className="w-full min-h-[44px] py-2.5 px-6 text-slate-400 hover:text-white font-bold text-xs uppercase tracking-wider transition cursor-pointer touch-manipulation"
               >
                 Return to Main Menu
               </button>
@@ -625,3 +830,4 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
     </div>
   );
 };
+

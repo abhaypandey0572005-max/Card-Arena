@@ -4,7 +4,9 @@ import {
   ServerMessage, 
   ClientMessage, 
   PlayerActionPayload, 
-  CustomRoomLobbyState 
+  CustomRoomLobbyState,
+  ShowdownStartPayload,
+  ShowdownActionPayload
 } from '@card-battler/shared';
 
 export interface QueueState {
@@ -19,6 +21,8 @@ export function useGameSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const [queueState, setQueueState] = useState<QueueState>({ inQueue: false, timeInQueue: 0 });
   const [customLobbyState, setCustomLobbyState] = useState<CustomRoomLobbyState | null>(null);
+  const [showdownMatch, setShowdownMatch] = useState<ShowdownStartPayload | null>(null);
+  const [showdownAction, setShowdownAction] = useState<ShowdownActionPayload | null>(null);
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
@@ -132,6 +136,15 @@ export function useGameSocket() {
                 if (msg.payload.myPlayerId) {
                   setMyPlayerId(msg.payload.myPlayerId);
                 }
+                break;
+
+              case 'SHOWDOWN_START':
+                setShowdownMatch(msg.payload);
+                setCustomLobbyState(null);
+                break;
+
+              case 'SHOWDOWN_ACTION':
+                setShowdownAction(msg.payload);
                 break;
 
               case 'GAME_STATE':
@@ -324,9 +337,24 @@ export function useGameSocket() {
     }
   }, [sendMessage, gameState?.roomId]);
 
+  const sendShowdownAction = useCallback((action: ShowdownActionPayload) => {
+    sendMessage({
+      type: 'SHOWDOWN_ACTION',
+      payload: action,
+    });
+  }, [sendMessage]);
+
+  const exitShowdownMatch = useCallback(() => {
+    setShowdownMatch(null);
+    setShowdownAction(null);
+    setCustomLobbyState(null);
+  }, []);
+
   const resetMatchState = useCallback(() => {
     setGameState(null);
     setCustomLobbyState(null);
+    setShowdownMatch(null);
+    setShowdownAction(null);
   }, []);
 
   return {
@@ -352,5 +380,9 @@ export function useGameSocket() {
     surrender,
     syncState,
     resetMatchState,
+    showdownMatch,
+    showdownAction,
+    sendShowdownAction,
+    exitShowdownMatch,
   };
 }
