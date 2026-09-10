@@ -14,6 +14,7 @@ export interface CustomRoomLobbyState {
   host: CustomLobbyPlayer;
   guest?: CustomLobbyPlayer;
   isHost: boolean;
+  myPlayerId?: string;
 }
 
 // Client to Server Messages
@@ -32,7 +33,7 @@ export type ClientMessage =
 // Server to Client Messages
 export type ServerMessage =
   | { type: 'QUEUE_STATUS'; payload: { inQueue: boolean; queuePosition?: number; timeInQueue: number } }
-  | { type: 'MATCH_FOUND'; payload: { roomId: string; opponentName: string; opponentAvatar: string; opponentRating: number } }
+  | { type: 'MATCH_FOUND'; payload: { roomId: string; opponentName: string; opponentAvatar: string; opponentRating: number; yourPlayerId?: string } }
   | { type: 'CUSTOM_ROOM_STATE'; payload: CustomRoomLobbyState }
   | { type: 'GAME_STATE'; payload: GameState }
   | { type: 'ACTION_REJECTED'; payload: { reason: string; actionType?: string; actionId?: string; currentState?: GameState } }

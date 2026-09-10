@@ -99,6 +99,7 @@ export const App: React.FC = () => {
     customLobbyState,
     gameState,
     lastError,
+    myPlayerId: serverPlayerId,
     joinQueue,
     leaveQueue,
     startAiMatch,
@@ -113,6 +114,13 @@ export const App: React.FC = () => {
     surrender,
     resetMatchState,
   } = useGameSocket();
+
+  // Close friend room modal immediately once match is established
+  useEffect(() => {
+    if (gameState) {
+      setShowFriendModal(false);
+    }
+  }, [gameState]);
 
   // Read URL query param ?room=ARENA-XXXX for instant friend joins
   useEffect(() => {
@@ -195,6 +203,9 @@ export const App: React.FC = () => {
 
   const getMyPlayerId = (): string => {
     if (!gameState) return '';
+    if (serverPlayerId && gameState.players[serverPlayerId]) {
+      return serverPlayerId;
+    }
     const matchingId = Object.keys(gameState.players).find(
       (id) => gameState.players[id].name === currentPlayerName
     );
@@ -567,6 +578,8 @@ export const App: React.FC = () => {
           defaultAvatar="cyber-runner"
           defaultDeckId={selectedDeckId}
           initialRoomCode={initialUrlRoomCode}
+          isConnected={isConnected}
+          errorMessage={lastError}
         />
       )}
 

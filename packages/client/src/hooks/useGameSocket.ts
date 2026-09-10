@@ -29,10 +29,17 @@ export function useGameSocket() {
   const queueTimerRef = useRef<NodeJS.Timeout | null>(null);
   const lastPingTimeRef = useRef<number>(0);
 
-  // Send message helper
+  const pendingMessagesRef = useRef<ClientMessage[]>([]);
+
+  // Send message helper with connecting queue
   const sendMessage = useCallback((msg: ClientMessage) => {
     if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
       socketRef.current.send(JSON.stringify(msg));
+    } else if (socketRef.current && socketRef.current.readyState === WebSocket.CONNECTING) {
+      console.log('Buffering message while WebSocket is connecting:', msg.type);
+      pendingMessagesRef.current.push(msg);
+    } else {
+      console.warn('Cannot send message, WebSocket not connected:', msg.type);
     }
   }, []);
 
@@ -64,6 +71,15 @@ export function useGameSocket() {
       setIsConnected(true);
       setLastError(null);
 
+      // Flush any messages buffered during connection establishment
+      while (pendingMessagesRef.current.length > 0) {
+        const queuedMsg = pendingMessagesRef.current.shift();
+        if (queuedMsg) {
+          console.log('Flushing buffered message:', queuedMsg.type);
+          ws.send(JSON.stringify(queuedMsg));
+        }
+      }
+
       // Start ping interval with RTT measurement
       pingIntervalRef.current = setInterval(() => {
         lastPingTimeRef.current = Date.now();
@@ -87,10 +103,16 @@ export function useGameSocket() {
           case 'MATCH_FOUND':
             setQueueState({ inQueue: false, timeInQueue: 0 });
             setCustomLobbyState(null);
+            if (msg.payload.yourPlayerId) {
+              setMyPlayerId(msg.payload.yourPlayerId);
+            }
             break;
 
           case 'CUSTOM_ROOM_STATE':
             setCustomLobbyState(msg.payload);
+            if (msg.payload.myPlayerId) {
+              setMyPlayerId(msg.payload.myPlayerId);
+            }
             break;
 
           case 'GAME_STATE':

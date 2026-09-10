@@ -25,6 +25,8 @@ interface FriendRoomModalProps {
   defaultAvatar: string;
   defaultDeckId: string;
   initialRoomCode?: string;
+  isConnected?: boolean;
+  errorMessage?: string | null;
 }
 
 export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
@@ -38,10 +40,14 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
   defaultAvatar,
   defaultDeckId,
   initialRoomCode = '',
+  isConnected = true,
+  errorMessage = null,
 }) => {
   const [tab, setTab] = useState<'create' | 'join'>(initialRoomCode ? 'join' : 'create');
   const [inputCode, setInputCode] = useState(initialRoomCode);
   const [copied, setCopied] = useState(false);
+  const [copiedCodeOnly, setCopiedCodeOnly] = useState(false);
+  const [isLaunching, setIsLaunching] = useState(false);
 
   useEffect(() => {
     if (initialRoomCode) {
@@ -49,6 +55,21 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
       setTab('join');
     }
   }, [initialRoomCode]);
+
+  const normalizeRoomCode = (raw: string): string => {
+    let cleaned = raw.trim().toUpperCase();
+    if (cleaned.includes('?ROOM=')) {
+      const parts = cleaned.split('?ROOM=');
+      cleaned = parts[1].split('&')[0];
+    } else if (cleaned.includes('/')) {
+      const parts = cleaned.split('/');
+      cleaned = parts[parts.length - 1];
+    }
+    if (!cleaned.startsWith('ARENA-') && /^\d+$/.test(cleaned)) {
+      cleaned = `ARENA-${cleaned}`;
+    }
+    return cleaned;
+  };
 
   const handleCopyLink = () => {
     if (!customLobbyState) return;
@@ -59,15 +80,24 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const handleCopyCodeOnly = () => {
+    if (!customLobbyState) return;
+    navigator.clipboard.writeText(customLobbyState.roomCode);
+    soundFX.playCardHover();
+    setCopiedCodeOnly(true);
+    setTimeout(() => setCopiedCodeOnly(false), 2500);
+  };
+
   const handleCreate = () => {
     soundFX.playCardPlay();
     onCreateRoom(defaultPlayerName, defaultAvatar, defaultDeckId);
   };
 
   const handleJoin = () => {
-    if (!inputCode.trim()) return;
+    const cleanCode = normalizeRoomCode(inputCode);
+    if (!cleanCode) return;
     soundFX.playCardPlay();
-    onJoinRoom(inputCode.trim().toUpperCase(), defaultPlayerName, defaultAvatar, defaultDeckId);
+    onJoinRoom(cleanCode, defaultPlayerName, defaultAvatar, defaultDeckId);
   };
 
   return (
@@ -88,7 +118,7 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
         </button>
 
         {/* Header */}
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex items-center gap-2 mb-4">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-arena-blue to-arena-cyan border border-white flex items-center justify-center shadow-md">
             <Users className="w-5 h-5 text-slate-950" />
           </div>
@@ -101,6 +131,22 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
             </p>
           </div>
         </div>
+
+        {/* Offline / Connecting Warning */}
+        {!isConnected && (
+          <div className="mb-4 p-3 rounded-xl bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-bold flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin text-amber-400" />
+            <span>Connecting to Arena WebSocket network...</span>
+          </div>
+        )}
+
+        {/* Error Alert Banner */}
+        {errorMessage && (
+          <div className="mb-4 p-3 rounded-xl bg-rose-500/20 border border-rose-500/50 text-rose-300 text-xs font-bold flex items-center gap-2 animate-shake">
+            <span className="text-base">⚠️</span>
+            <span>{errorMessage}</span>
+          </div>
+        )}
 
         {!customLobbyState ? (
           /* Mode Selector (Create vs Join) */
@@ -146,7 +192,8 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
 
                 <button
                   onClick={handleCreate}
-                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-arena-cyan hover:to-white text-slate-950 font-black font-display uppercase tracking-widest text-sm shadow-xl shadow-arena-cyan/30 transition transform hover:scale-102 active:scale-98 border-2 border-white"
+                  disabled={!isConnected}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-arena-cyan hover:to-white text-slate-950 font-black font-display uppercase tracking-widest text-sm shadow-xl shadow-arena-cyan/30 transition transform hover:scale-102 active:scale-98 border-2 border-white disabled:opacity-50"
                 >
                   Generate Room Code & Link
                 </button>
@@ -166,7 +213,7 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
 
                 <button
                   onClick={handleJoin}
-                  disabled={!inputCode.trim()}
+                  disabled={!inputCode.trim() || !isConnected}
                   className="w-full py-4 rounded-2xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-arena-cyan hover:to-white text-slate-950 font-black font-display uppercase tracking-widest text-sm shadow-xl shadow-arena-cyan/30 transition transform hover:scale-102 active:scale-98 border-2 border-white disabled:opacity-50 disabled:pointer-events-none"
                 >
                   Join Friend's Room
@@ -178,7 +225,7 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
           /* Active Staging Lobby */
           <div className="py-2">
             {/* Room Code & Copy Share Link Bar */}
-            <div className="bg-slate-950/80 p-4 rounded-2xl border border-arena-cyan/40 flex items-center justify-between mb-6">
+            <div className="bg-slate-950/80 p-4 rounded-2xl border border-arena-cyan/40 flex items-center justify-between gap-2 mb-6">
               <div>
                 <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
                   Private Room Code
@@ -188,13 +235,24 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
                 </h3>
               </div>
 
-              <button
-                onClick={handleCopyLink}
-                className="px-4 py-2 rounded-xl bg-arena-blue/20 hover:bg-arena-blue/40 border border-arena-cyan text-arena-cyan font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition"
-              >
-                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                {copied ? 'Link Copied!' : 'Copy Invite Link'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCopyCodeOnly}
+                  className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-arena-cyan text-slate-300 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition"
+                  title="Copy 6-digit code only"
+                >
+                  {copiedCodeOnly ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  <span>{copiedCodeOnly ? 'Copied' : 'Code'}</span>
+                </button>
+
+                <button
+                  onClick={handleCopyLink}
+                  className="px-4 py-2 rounded-xl bg-arena-blue/20 hover:bg-arena-blue/40 border border-arena-cyan text-arena-cyan font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition"
+                >
+                  {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <LinkIcon className="w-4 h-4" />}
+                  <span>{copied ? 'Link Copied!' : 'Copy Link'}</span>
+                </button>
+              </div>
             </div>
 
             {/* Players Staging Cards Grid */}
@@ -243,24 +301,35 @@ export const FriendRoomModal: React.FC<FriendRoomModalProps> = ({
                 <div className="p-4 rounded-2xl bg-slate-950/40 border border-dashed border-slate-700 flex flex-col items-center justify-center text-center">
                   <Loader2 className="w-6 h-6 text-slate-500 animate-spin mb-2" />
                   <span className="text-xs font-bold text-slate-400">Waiting for Friend...</span>
-                  <span className="text-[10px] text-slate-500 mt-1">Send them the invite link!</span>
+                  <span className="text-[10px] text-slate-500 mt-1">Send them the room code or link!</span>
                 </div>
               )}
             </div>
 
             {/* Launch Match Button (Host Only) */}
             {customLobbyState.isHost ? (
-              <button
-                onClick={() => {
-                  soundFX.playCardPlay();
-                  onStartMatch(customLobbyState.roomCode);
-                }}
-                disabled={!customLobbyState.guest}
-                className="w-full py-4 rounded-2xl bg-gradient-to-r from-arena-blue via-arena-cyan to-arena-blue hover:from-arena-cyan hover:to-white text-slate-950 font-black font-display uppercase tracking-widest text-sm shadow-xl shadow-arena-cyan/30 transition transform hover:scale-102 active:scale-98 border-2 border-white disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2"
-              >
-                <Swords className="w-5 h-5" />
-                Start Battle
-              </button>
+              isLaunching ? (
+                <button
+                  disabled
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-arena-blue via-arena-cyan to-arena-blue text-slate-950 font-black font-display uppercase tracking-widest text-sm shadow-xl flex items-center justify-center gap-2 opacity-80"
+                >
+                  <Loader2 className="w-5 h-5 text-slate-950 animate-spin" />
+                  Launching Arena Battle...
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    soundFX.playCardPlay();
+                    setIsLaunching(true);
+                    onStartMatch(customLobbyState.roomCode);
+                  }}
+                  disabled={!customLobbyState.guest}
+                  className="w-full py-4 rounded-2xl bg-gradient-to-r from-arena-blue via-arena-cyan to-arena-blue hover:from-arena-cyan hover:to-white text-slate-950 font-black font-display uppercase tracking-widest text-sm shadow-xl shadow-arena-cyan/30 transition transform hover:scale-102 active:scale-98 border-2 border-white disabled:opacity-40 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <Swords className="w-5 h-5" />
+                  Start Battle
+                </button>
+              )
             ) : (
               <div className="w-full py-3.5 rounded-2xl bg-slate-900 border border-slate-700 text-slate-300 font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2">
                 <Loader2 className="w-4 h-4 text-arena-cyan animate-spin" />

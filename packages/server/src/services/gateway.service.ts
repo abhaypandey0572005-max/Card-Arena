@@ -215,19 +215,26 @@ export class GatewayService {
                   host: lobby.host,
                   guest: undefined,
                   isHost: true,
+                  myPlayerId: playerId,
                 },
               });
               break;
             }
 
             case 'JOIN_CUSTOM_ROOM': {
-              const formattedCode = message.payload.roomCode.trim().toUpperCase();
+              let formattedCode = message.payload.roomCode.trim().toUpperCase();
+              if (formattedCode.includes('?ROOM=')) {
+                formattedCode = formattedCode.split('?ROOM=')[1].split('&')[0];
+              }
+              if (!formattedCode.startsWith('ARENA-') && /^\d+$/.test(formattedCode)) {
+                formattedCode = `ARENA-${formattedCode}`;
+              }
               const lobby = this.customLobbies.get(formattedCode);
 
               if (!lobby) {
                 this.send(extWs, {
                   type: 'ERROR',
-                  payload: { message: `Room code "${formattedCode}" not found. Please check and try again.` },
+                  payload: { message: `Room code "${formattedCode}" not found. Please check the code and try again.` },
                 });
                 return;
               }
@@ -263,6 +270,7 @@ export class GatewayService {
                     host: lobby.host,
                     guest: lobby.guest,
                     isHost: true,
+                    myPlayerId: lobby.host.playerId,
                   },
                 });
               }
@@ -274,6 +282,7 @@ export class GatewayService {
                   host: lobby.host,
                   guest: lobby.guest,
                   isHost: false,
+                  myPlayerId: playerId,
                 },
               });
               break;

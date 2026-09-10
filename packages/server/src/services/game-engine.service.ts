@@ -277,6 +277,7 @@ export class GameEngineService {
           opponentName: guestConfig.name,
           opponentAvatar: guestConfig.avatar,
           opponentRating: guestConfig.rating,
+          yourPlayerId: hostConfig.id,
         },
       },
     });
@@ -295,6 +296,7 @@ export class GameEngineService {
           opponentName: hostConfig.name,
           opponentAvatar: hostConfig.avatar,
           opponentRating: hostConfig.rating,
+          yourPlayerId: guestConfig.id,
         },
       },
     });
