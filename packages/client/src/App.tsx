@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGameSocket } from './hooks/useGameSocket.js';
 import { ParticleBackground } from './components/ParticleBackground.js';
 import { LandingHero } from './components/LandingHero.js';
@@ -155,6 +155,17 @@ export const App: React.FC = () => {
     setIsMuted(nextMute);
   };
 
+  const quickMatchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up timer on unmount
+  useEffect(() => {
+    return () => {
+      if (quickMatchTimeoutRef.current) {
+        clearTimeout(quickMatchTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleQuickMatch = () => {
     soundFX.playCardPlay();
     setIsSearchingQuickMatch(true);
@@ -172,21 +183,26 @@ export const App: React.FC = () => {
     ];
     const pickedRival = RIVAL_PILOTS[Math.floor(Math.random() * RIVAL_PILOTS.length)];
 
-    // Simulate authentic matchmaking radar search across the multiverse network
-    setTimeout(() => {
-      setIsSearchingQuickMatch((active) => {
-        if (!active) return false;
-        soundFX.playMatchStart();
-        setIsQuickMatchMode(true);
-        setQuickMatchOpponent(pickedRival);
-        setViewMode('showdown');
-        return false;
-      });
+    if (quickMatchTimeoutRef.current) {
+      clearTimeout(quickMatchTimeoutRef.current);
+    }
+
+    // Authentic matchmaking radar search across the multiverse network
+    quickMatchTimeoutRef.current = setTimeout(() => {
+      soundFX.playMatchStart();
+      setIsSearchingQuickMatch(false);
+      setIsQuickMatchMode(true);
+      setQuickMatchOpponent(pickedRival);
+      setViewMode('showdown');
     }, 2200);
   };
 
   const handleCancelQuickMatch = () => {
     soundFX.playCardHover();
+    if (quickMatchTimeoutRef.current) {
+      clearTimeout(quickMatchTimeoutRef.current);
+      quickMatchTimeoutRef.current = null;
+    }
     setIsSearchingQuickMatch(false);
     leaveQueue();
   };
