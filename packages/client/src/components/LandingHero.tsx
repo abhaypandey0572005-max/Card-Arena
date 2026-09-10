@@ -54,8 +54,8 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
 
   const heroCards = [
     CARD_DATABASE.find((c) => c.id === 'anime-goku') || CARD_DATABASE[0],
-    CARD_DATABASE.find((c) => c.id === 'marvel-thanos') || CARD_DATABASE[1],
-    CARD_DATABASE.find((c) => c.id === 'pkmn-charizard') || CARD_DATABASE[2],
+    CARD_DATABASE.find((c) => c.id === 'cars-mcqueen') || CARD_DATABASE[1],
+    CARD_DATABASE.find((c) => c.id === 'fifa-messi') || CARD_DATABASE[2],
   ];
 
   return (
@@ -70,7 +70,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
           <Radio className="w-3.5 h-3.5" /> 1,284 PLAYERS ONLINE
         </span>
         <span className="text-slate-600 hidden sm:inline">|</span>
-        <span className="text-xs font-bold text-slate-400 hidden sm:inline">MARVEL • DC • POKEMON • WWE • ANIME</span>
+        <span className="text-xs font-bold text-slate-400 hidden sm:inline">MARVEL • DC • POKEMON • WWE • ANIME • FIFA • CARS</span>
         {onOpenLogin && (
           <>
             <span className="text-slate-600">|</span>
@@ -95,7 +95,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
       </div>
 
       {/* Center Stage */}
-      <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-12 my-auto py-6">
+      <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12 my-auto py-4 sm:py-6">
         {/* Left Column: Kinetic Typography & Action Matrix */}
         <div className="flex-1 flex flex-col items-center lg:items-start text-center lg:text-left z-20">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-arena-blue/15 border border-arena-blue/40 text-arena-cyan text-xs font-black uppercase tracking-widest mb-4">
@@ -111,7 +111,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
           </h1>
 
           <p className="text-sm sm:text-lg text-slate-300 font-semibold tracking-wide mt-4 max-w-lg leading-relaxed">
-            Battle with iconic characters across <strong className="text-arena-cyan">Marvel</strong>, <strong className="text-arena-blue">DC</strong>, <strong className="text-amber-400">Pokemon</strong>, <strong className="text-rose-400">WWE</strong>, and <strong className="text-yellow-300">Anime</strong>. Play online PvP, invite friends directly, or challenge the AI Bot!
+            Battle with iconic characters across <strong className="text-arena-cyan">Marvel</strong>, <strong className="text-arena-blue">DC</strong>, <strong className="text-amber-400">Pokemon</strong>, <strong className="text-rose-400">WWE</strong>, <strong className="text-yellow-300">Anime</strong>, <strong className="text-emerald-400">FIFA</strong>, and <strong className="text-red-400">Pixar's Cars</strong>. Play online PvP, invite friends directly, or challenge the AI Bot!
           </p>
 
           {/* Current Battle Realm Selector Banner */}
@@ -198,11 +198,11 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             transform: `translate3d(${mousePos.x}px, ${mousePos.y}px, 0)`,
             transition: 'transform 300ms ease-out',
           }}
-          className="flex-1 relative w-full max-w-md h-80 sm:h-96 flex items-center justify-center"
+          className="flex-1 relative w-full max-w-md h-72 sm:h-80 md:h-96 flex items-center justify-center scale-90 sm:scale-100"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-arena-blue/20 via-arena-cyan/20 to-transparent rounded-full filter blur-3xl -z-10" />
 
-          {/* Card 1 (Thanos - Left) */}
+          {/* Card 1 (Lightning McQueen - Left) */}
           <div className="absolute -left-4 sm:left-2 top-8 transform -rotate-12 hover:rotate-0 hover:scale-110 hover:z-30 transition-all duration-300 animate-card-float">
             <Card3D card={heroCards[1]} />
           </div>
@@ -212,7 +212,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
             <Card3D card={heroCards[0]} isPlayable />
           </div>
 
-          {/* Card 3 (Charizard - Right) */}
+          {/* Card 3 (Messi - Right) */}
           <div
             style={{ animationDelay: '1.5s' }}
             className="absolute -right-4 sm:right-2 top-12 transform rotate-12 hover:rotate-0 hover:scale-110 hover:z-30 transition-all duration-300 animate-card-float"
@@ -235,7 +235,7 @@ export const LandingHero: React.FC<LandingHeroProps> = ({
           </div>
           <div className="flex items-center gap-2 p-2.5 rounded-xl glass-panel">
             <Swords className="w-4 h-4 text-arena-gold shrink-0" />
-            <span className="font-bold text-slate-300">Marvel • DC • Pokemon • WWE • Anime</span>
+            <span className="font-bold text-slate-300">Marvel • DC • Pokemon • Anime • WWE • FIFA • Cars</span>
           </div>
           <div className="flex items-center gap-2 p-2.5 rounded-xl glass-panel">
             <Flame className="w-4 h-4 text-orange-400 shrink-0" />

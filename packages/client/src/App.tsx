@@ -254,18 +254,18 @@ export const App: React.FC = () => {
         )}
 
         {/* Right Controls */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* User Account / Sign In Badge */}
           {currentUser ? (
-            <div className="flex items-center gap-2 p-1 pl-2.5 pr-1.5 rounded-xl bg-slate-900/90 border border-arena-cyan/50 shadow-md">
-              <div className="w-6 h-6 rounded-lg bg-arena-blue/30 border border-arena-cyan flex items-center justify-center text-xs">
+            <div className="flex items-center gap-1.5 p-1 pl-2 pr-1 rounded-xl bg-slate-900/90 border border-arena-cyan/50 shadow-md">
+              <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-md sm:rounded-lg bg-arena-blue/30 border border-arena-cyan flex items-center justify-center text-xs">
                 👤
               </div>
               <div className="flex flex-col text-left">
-                <span className="text-[11px] font-black text-arena-cyan leading-tight truncate max-w-[80px] sm:max-w-[120px]">
+                <span className="text-[10px] sm:text-[11px] font-black text-arena-cyan leading-tight truncate max-w-[60px] sm:max-w-[120px]">
                   {currentUser.username}
                 </span>
-                <span className="text-[8px] font-bold text-emerald-400 uppercase tracking-wider">
+                <span className="text-[7px] sm:text-[8px] font-bold text-emerald-400 uppercase tracking-wider hidden sm:block">
                   Active
                 </span>
               </div>
@@ -274,7 +274,7 @@ export const App: React.FC = () => {
                 className="p-1 rounded-lg hover:bg-rose-950/60 text-slate-500 hover:text-rose-400 transition cursor-pointer"
                 title="Sign Out"
               >
-                <LogOut className="w-3.5 h-3.5" />
+                <LogOut className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
               </button>
             </div>
           ) : (
@@ -283,7 +283,7 @@ export const App: React.FC = () => {
                 soundFX.playCardPlay();
                 setViewMode('login');
               }}
-              className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-md shadow-arena-cyan/20 border border-white transition transform hover:scale-105 cursor-pointer"
+              className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center gap-1 shadow-md shadow-arena-cyan/20 border border-white transition transform hover:scale-105 cursor-pointer"
               title="Sign In / Register Account"
             >
               <UserIcon className="w-3.5 h-3.5" />
@@ -297,10 +297,10 @@ export const App: React.FC = () => {
               soundFX.playCardHover();
               setShowFounder(true);
             }}
-            className="p-2 px-2.5 rounded-xl glass-panel text-amber-300 hover:text-white border border-amber-500/50 hover:border-amber-400 transition flex items-center gap-1.5 bg-amber-500/15 shadow-md shadow-amber-500/10 cursor-pointer"
+            className="p-1.5 sm:p-2 px-2 sm:px-2.5 rounded-xl glass-panel text-amber-300 hover:text-white border border-amber-500/50 hover:border-amber-400 transition flex items-center gap-1.5 bg-amber-500/15 shadow-md shadow-amber-500/10 cursor-pointer"
             title="Founder Dossier — Abhay Pandey"
           >
-            <Crown className="w-4 h-4 text-amber-400" />
+            <Crown className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-amber-400" />
             <span className="text-xs font-black uppercase tracking-wider hidden lg:inline">
               Founder: Abhay
             </span>
@@ -312,11 +312,14 @@ export const App: React.FC = () => {
               soundFX.playCardHover();
               setShowUniverseModal(true);
             }}
-            className="px-3 py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-arena-cyan border border-arena-cyan/40 hover:border-arena-cyan transition flex items-center gap-1.5 shadow-sm group"
-            title="Switch Battle Universe (Marvel, DC, Pokemon, Anime, WWE)"
+            className="px-2 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-arena-cyan border border-arena-cyan/40 hover:border-arena-cyan transition flex items-center gap-1 shadow-sm group"
+            title="Switch Battle Universe"
           >
-            <span className="text-xs font-black uppercase font-cinzel tracking-wider group-hover:text-white">
+            <span className="text-[11px] sm:text-xs font-black uppercase font-cinzel tracking-wider group-hover:text-white hidden sm:inline">
               ⚔️ {currentUniverse.name}
+            </span>
+            <span className="text-[11px] font-black uppercase font-cinzel tracking-wider group-hover:text-white sm:hidden">
+              ⚔️ {currentUniverse.universe}
             </span>
           </button>
 
@@ -327,10 +330,10 @@ export const App: React.FC = () => {
               setPlayerStats(loadPlayerStats(currentPlayerName));
               setShowLeaderboard(true);
             }}
-            className="p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-gold border border-slate-700 hover:border-arena-gold transition flex items-center gap-1.5"
+            className="p-1.5 sm:p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-gold border border-slate-700 hover:border-arena-gold transition flex items-center gap-1.5"
             title="Global Leaderboard & Rankings"
           >
-            <Trophy className="w-4 h-4 text-arena-gold" />
+            <Trophy className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-arena-gold" />
             <span className="text-xs font-mono font-black text-arena-gold hidden lg:inline">
               {playerStats.mmr} MMR
             </span>
@@ -341,25 +344,25 @@ export const App: React.FC = () => {
               soundFX.playCardHover();
               setShowHowToPlay(true);
             }}
-            className="p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-cyan border border-slate-700 hover:border-arena-cyan transition"
+            className="hidden md:flex p-1.5 sm:p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-cyan border border-slate-700 hover:border-arena-cyan transition"
             title="Rules & How to Play"
           >
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
           </button>
 
           <button
             onClick={toggleMute}
-            className="p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-cyan border border-slate-700 hover:border-arena-cyan transition"
+            className="p-1.5 sm:p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-cyan border border-slate-700 hover:border-arena-cyan transition"
             title={isMuted ? 'Unmute Sound' : 'Mute Sound'}
           >
-            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-arena-cyan" />}
+            {isMuted ? <VolumeX className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-rose-400" /> : <Volume2 className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-arena-cyan" />}
           </button>
 
           <button
             onClick={toggleTheme}
-            className="p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-gold border border-slate-700 hover:border-arena-gold transition flex items-center gap-1.5"
+            className="p-1.5 sm:p-2 rounded-xl glass-panel text-slate-300 hover:text-arena-gold border border-slate-700 hover:border-arena-gold transition flex items-center gap-1"
           >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-arena-gold" /> : <Moon className="w-4 h-4 text-arena-blue" />}
+            {theme === 'dark' ? <Sun className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-arena-gold" /> : <Moon className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-arena-blue" />}
             <span className="text-[10px] font-black uppercase tracking-wider hidden sm:inline">
               {theme === 'dark' ? 'DARK' : 'LIGHT'}
             </span>

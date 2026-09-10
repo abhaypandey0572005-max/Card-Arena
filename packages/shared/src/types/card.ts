@@ -5,6 +5,8 @@ export type CardFaction =
   | 'pokemon' 
   | 'wwe' 
   | 'anime' 
+  | 'fifa'
+  | 'cars'
   | 'apex' 
   | 'solaris' 
   | 'quantum' 

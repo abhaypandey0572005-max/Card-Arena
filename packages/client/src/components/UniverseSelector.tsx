@@ -97,6 +97,34 @@ export const UNIVERSES: UniverseOption[] = [
     bannerArt: '/cards/rock.jpg',
     description: 'Duel with pure WWE champions: People\'s Elbows, AA slams, Tribal Chief spears & Tombstones!',
   },
+  {
+    id: 'fifa-legends',
+    name: 'FIFA vs FIFA',
+    tagline: 'World Cup Legends & Ballon d\'Or Kings',
+    badge: 'FOOTBALL GOATS',
+    universe: 'FIFA',
+    themeColor: 'from-emerald-500 to-teal-700',
+    borderColor: 'border-emerald-500/60 hover:border-emerald-400',
+    glowColor: 'shadow-emerald-500/30',
+    bgGradient: 'bg-gradient-to-br from-emerald-950/70 via-slate-900 to-slate-950',
+    keyHeroes: ['Messi', 'Ronaldo', 'Mbappé', 'Haaland', 'Neymar Jr', 'Pelé', 'Maradona'],
+    bannerArt: '/cards/fifa-messi.jpg',
+    description: 'Duel with pure football icons: Ankara Messi dribbles, SIUU rocket strikes, lightning counter-attacks & samba magic!',
+  },
+  {
+    id: 'cars-pixar',
+    name: 'Cars vs Cars',
+    tagline: 'Radiator Springs & Piston Cup Legends',
+    badge: 'SPEED & HORSEPOWER',
+    universe: 'CARS',
+    themeColor: 'from-amber-500 to-red-600',
+    borderColor: 'border-amber-500/60 hover:border-amber-400',
+    glowColor: 'shadow-amber-500/30',
+    bgGradient: 'bg-gradient-to-br from-amber-950/70 via-slate-900 to-slate-950',
+    keyHeroes: ['Lightning McQueen', 'Tow Mater', 'Doc Hudson', 'Jackson Storm', 'Cruz', 'Francesco'],
+    bannerArt: '/cards/cars-mcqueen.jpg',
+    description: 'Duel with pure Pixar Cars: Ka-chow speed bursts, dirt track drifting, reverse towing & next-gen simulators!',
+  },
 ];
 
 interface UniverseSelectorModalProps {
@@ -117,21 +145,21 @@ export const UniverseSelectorModal: React.FC<UniverseSelectorModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-4xl bg-slate-950 border border-slate-700/80 rounded-2xl shadow-2xl p-6 sm:p-8 flex flex-col max-h-[92vh] overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="relative w-full max-w-4xl bg-slate-950 border border-slate-700/80 rounded-2xl shadow-2xl p-4 sm:p-7 flex flex-col max-h-[92dvh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+        <div className="flex items-center justify-between pb-3 sm:pb-4 border-b border-slate-800">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black px-2.5 py-0.5 rounded-full bg-arena-cyan/20 border border-arena-cyan text-arena-cyan tracking-wider uppercase">
+              <span className="text-[10px] sm:text-xs font-black px-2.5 py-0.5 rounded-full bg-arena-cyan/20 border border-arena-cyan text-arena-cyan tracking-wider uppercase">
                 Fair Universe Matchups
               </span>
             </div>
-            <h2 className="text-2xl sm:text-3xl font-black font-cinzel text-white mt-1">
+            <h2 className="text-xl sm:text-3xl font-black font-cinzel text-white mt-1">
               Select Your Battle Realm
             </h2>
-            <p className="text-xs sm:text-sm text-slate-400">
-              Pick which universe to play. Both you and your opponent will play pure, matched cards (Marvel vs Marvel, DC vs DC, etc.)!
+            <p className="text-[11px] sm:text-xs text-slate-400">
+              Pick which universe to play. Both you and your opponent will play pure, matched cards (Marvel vs Marvel, FIFA vs FIFA, Cars vs Cars, etc.)!
             </p>
           </div>
           <button
@@ -139,14 +167,14 @@ export const UniverseSelectorModal: React.FC<UniverseSelectorModalProps> = ({
               soundFX.playCardHover();
               onClose();
             }}
-            className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition"
+            className="p-1.5 sm:p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white transition shrink-0 ml-2"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Universe Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 my-5 overflow-y-auto pr-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 my-3 sm:my-5 overflow-y-auto overscroll-contain pr-1">
           {UNIVERSES.map((u) => {
             const isSelected = selectedUniverseId === u.id;
             return (
@@ -156,7 +184,7 @@ export const UniverseSelectorModal: React.FC<UniverseSelectorModalProps> = ({
                   soundFX.playCardPlay();
                   onSelect(u.id);
                 }}
-                className={`relative p-5 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden group ${
+                className={`relative p-3.5 sm:p-5 rounded-xl border transition-all duration-300 cursor-pointer overflow-hidden group ${
                   u.bgGradient
                 } ${
                   isSelected

@@ -15,6 +15,8 @@ interface Card3DProps {
   isSelected?: boolean;
   isTargetable?: boolean;
   compact?: boolean;
+  size?: 'sm' | 'md' | 'lg' | 'responsive';
+  className?: string;
   onClick?: () => void;
 }
 
@@ -25,6 +27,8 @@ export const Card3D: React.FC<Card3DProps> = ({
   isSelected = false,
   isTargetable = false,
   compact = false,
+  size = 'responsive',
+  className = '',
   onClick,
 }) => {
   const cardRef = useRef<HTMLDivElement | null>(null);
@@ -84,6 +88,20 @@ export const Card3D: React.FC<Card3DProps> = ({
     }
   };
 
+  const getSizeClasses = () => {
+    switch (size) {
+      case 'sm':
+        return 'w-24 h-36 sm:w-28 sm:h-42 p-1.5';
+      case 'md':
+        return 'w-32 h-48 sm:w-36 sm:h-54 p-2 sm:p-2.5';
+      case 'lg':
+        return 'w-40 h-60 sm:w-48 sm:h-72 p-2 sm:p-2.5';
+      case 'responsive':
+      default:
+        return 'w-28 h-44 sm:w-36 sm:h-56 md:w-44 md:h-68 lg:w-48 lg:h-72 p-1.5 sm:p-2 md:p-2.5';
+    }
+  };
+
   if (compact) {
     return (
       <div
@@ -130,13 +148,13 @@ export const Card3D: React.FC<Card3DProps> = ({
           transform: `rotateX(${rotate.x}deg) rotateY(${rotate.y}deg) scale(${isSelected ? 1.08 : 1})`,
           transition: 'transform 100ms ease-out',
         }}
-        className={`relative w-44 h-64 sm:w-48 sm:h-72 rounded-2xl border-2 p-2.5 flex flex-col justify-between select-none cursor-pointer overflow-hidden backdrop-blur-md glass-panel ${getRarityClasses()} ${
+        className={`relative ${getSizeClasses()} rounded-2xl border-2 flex flex-col justify-between select-none cursor-pointer overflow-hidden backdrop-blur-md glass-panel ${getRarityClasses()} ${
           isPlayable ? 'card-playable-cyan -translate-y-2' : ''
         } ${isAttackerReady ? 'card-attack-ready -translate-y-1' : ''} ${
           isSelected ? 'ring-4 ring-arena-gold z-30 shadow-2xl -translate-y-4' : ''
         } ${isTargetable ? 'ring-4 ring-rose-500 animate-pulse' : ''} ${
           card.isTaunt ? 'border-amber-400' : ''
-        }`}
+        } ${className}`}
       >
         {/* Holographic Sheen Layer */}
         <div
@@ -168,31 +186,31 @@ export const Card3D: React.FC<Card3DProps> = ({
 
         {/* Top Header: Energy Crystal & Rarity/Traits */}
         <div className="relative z-10 flex items-start justify-between">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-arena-blue to-arena-cyan border-2 border-white flex items-center justify-center font-black text-white text-sm shadow-md">
+          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 rounded-lg sm:rounded-xl bg-gradient-to-br from-arena-blue to-arena-cyan border-2 border-white flex items-center justify-center font-black text-white text-xs sm:text-sm shadow-md shrink-0">
             {card.manaCost}
           </div>
 
           <div className="flex flex-col gap-1 items-end">
             {card.isTaunt && (
-              <span className="px-1.5 py-0.5 rounded-md bg-amber-500/30 border border-amber-400 text-[9px] font-black text-amber-300 uppercase tracking-wider flex items-center gap-0.5 shadow-sm">
+              <span className="px-1 sm:px-1.5 py-0.5 rounded-md bg-amber-500/30 border border-amber-400 text-[8px] sm:text-[9px] font-black text-amber-300 uppercase tracking-wider flex items-center gap-0.5 shadow-sm">
                 <Shield className="w-2.5 h-2.5" /> Taunt
               </span>
             )}
             {hasShield && (
-              <span className="px-1.5 py-0.5 rounded-md bg-sky-500/30 border border-sky-400 text-[9px] font-black text-sky-300 uppercase tracking-wider shadow-sm">
+              <span className="px-1 sm:px-1.5 py-0.5 rounded-md bg-sky-500/30 border border-sky-400 text-[8px] sm:text-[9px] font-black text-sky-300 uppercase tracking-wider shadow-sm">
                 Shield
               </span>
             )}
             {card.isRush && (
-              <span className="px-1.5 py-0.5 rounded-md bg-orange-500/30 border border-orange-400 text-[9px] font-black text-orange-300 uppercase tracking-wider shadow-sm">
+              <span className="px-1 sm:px-1.5 py-0.5 rounded-md bg-orange-500/30 border border-orange-400 text-[8px] sm:text-[9px] font-black text-orange-300 uppercase tracking-wider shadow-sm">
                 Rush
               </span>
             )}
           </div>
         </div>
 
-        {/* Center Character Artwork Frame (100% Accurate & Matched) */}
-        <div className="relative z-10 w-full h-24 sm:h-28 rounded-xl overflow-hidden border border-slate-700/80 shadow-inner bg-slate-950 my-1 group">
+        {/* Center Character Artwork Frame */}
+        <div className="relative z-10 w-full h-18 sm:h-24 md:h-28 rounded-lg sm:rounded-xl overflow-hidden border border-slate-700/80 shadow-inner bg-slate-950 my-0.5 sm:my-1 group">
           <CharacterArt
             artIcon={card.artIcon}
             name={card.name}
@@ -200,54 +218,54 @@ export const Card3D: React.FC<Card3DProps> = ({
             imageUrl={card.imageUrl}
           />
           {/* Faction tag overlay */}
-          <span className="absolute bottom-1 right-1.5 text-[8px] uppercase font-mono font-bold px-1 rounded bg-black/80 text-slate-300 border border-white/10 z-10">
+          <span className="absolute bottom-0.5 right-1 text-[7px] sm:text-[8px] uppercase font-mono font-bold px-1 rounded bg-black/80 text-slate-300 border border-white/10 z-10">
             {card.faction}
           </span>
         </div>
 
         {/* Character Name & Brief Effect */}
-        <div className="relative z-10 text-center px-1">
+        <div className="relative z-10 text-center px-0.5">
           <h4
-            className={`text-xs sm:text-sm font-black tracking-wide leading-tight truncate ${
+            className={`text-[11px] sm:text-xs md:text-sm font-black tracking-wide leading-tight truncate ${
               isLegendary ? 'text-arena-gold font-display' : 'text-slate-100'
             }`}
           >
             {card.name}
           </h4>
-          <p className="text-[9px] text-slate-300 font-semibold leading-tight line-clamp-1 mt-0.5">
+          <p className="text-[8px] sm:text-[9px] text-slate-300 font-semibold leading-tight line-clamp-1 mt-0.5">
             {card.description}
           </p>
         </div>
 
         {/* 4-Stat Reactor Matrix (Power, Speed, Agility, Health) */}
         {card.type === 'minion' ? (
-          <div className="relative z-10 grid grid-cols-4 gap-1 pt-1.5 border-t border-slate-800/80 text-center">
+          <div className="relative z-10 grid grid-cols-4 gap-0.5 sm:gap-1 pt-1 sm:pt-1.5 border-t border-slate-800/80 text-center">
             {/* Power (PWR) */}
-            <div className="flex flex-col items-center bg-orange-950/40 rounded-lg p-0.5 border border-orange-500/40" title="Power (Attack Damage)">
-              <span className="text-[8px] font-black text-orange-400 uppercase">PWR</span>
-              <span className="text-xs font-black text-white">{currentAttack}</span>
+            <div className="flex flex-col items-center bg-orange-950/40 rounded sm:rounded-lg p-0.5 border border-orange-500/40" title="Power (Attack Damage)">
+              <span className="text-[7px] sm:text-[8px] font-black text-orange-400 uppercase">PWR</span>
+              <span className="text-[10px] sm:text-xs font-black text-white">{currentAttack}</span>
             </div>
 
             {/* Speed (SPD) */}
-            <div className="flex flex-col items-center bg-amber-950/40 rounded-lg p-0.5 border border-amber-400/40" title="Speed (Strike Initiative)">
-              <span className="text-[8px] font-black text-amber-300 uppercase flex items-center gap-0.5">
+            <div className="flex flex-col items-center bg-amber-950/40 rounded sm:rounded-lg p-0.5 border border-amber-400/40" title="Speed (Strike Initiative)">
+              <span className="text-[7px] sm:text-[8px] font-black text-amber-300 uppercase flex items-center gap-0.5">
                 <Zap className="w-2 h-2" />SPD
               </span>
-              <span className="text-xs font-black text-white">{currentSpeed}</span>
+              <span className="text-[10px] sm:text-xs font-black text-white">{currentSpeed}</span>
             </div>
 
             {/* Agility (AGI) */}
-            <div className="flex flex-col items-center bg-cyan-950/40 rounded-lg p-0.5 border border-cyan-500/40" title="Agility (Evasion & Damage Mitigation)">
-              <span className="text-[8px] font-black text-cyan-400 uppercase flex items-center gap-0.5">
+            <div className="flex flex-col items-center bg-cyan-950/40 rounded sm:rounded-lg p-0.5 border border-cyan-500/40" title="Agility (Evasion & Damage Mitigation)">
+              <span className="text-[7px] sm:text-[8px] font-black text-cyan-400 uppercase flex items-center gap-0.5">
                 <Wind className="w-2 h-2" />AGI
               </span>
-              <span className="text-xs font-black text-white">{currentAgility}</span>
+              <span className="text-[10px] sm:text-xs font-black text-white">{currentAgility}</span>
             </div>
 
             {/* Health (HP) */}
-            <div className="flex flex-col items-center bg-rose-950/40 rounded-lg p-0.5 border border-rose-500/40" title="Stamina (Health)">
-              <span className="text-[8px] font-black text-rose-400 uppercase">HP</span>
-              <span className="text-xs font-black text-white">{currentHealth}</span>
+            <div className="flex flex-col items-center bg-rose-950/40 rounded sm:rounded-lg p-0.5 border border-rose-500/40" title="Stamina (Health)">
+              <span className="text-[7px] sm:text-[8px] font-black text-rose-400 uppercase">HP</span>
+              <span className="text-[10px] sm:text-xs font-black text-white">{currentHealth}</span>
             </div>
           </div>
         ) : (

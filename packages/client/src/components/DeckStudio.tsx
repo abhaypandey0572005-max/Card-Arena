@@ -74,7 +74,7 @@ export const DeckStudio: React.FC<DeckStudioProps> = ({
               Multiverse Deck Studio
             </h1>
             <p className="text-xs text-slate-400 font-semibold">
-              Browse Marvel, DC, Pokemon, WWE, and Anime character cards
+              Browse Marvel, DC, Pokemon, WWE, Anime, FIFA, and Pixar's Cars character cards
             </p>
           </div>
         </div>
@@ -123,8 +123,10 @@ export const DeckStudio: React.FC<DeckStudioProps> = ({
                 { id: 'marvel', label: '🦸 Marvel' },
                 { id: 'dc', label: '🦇 DC' },
                 { id: 'pokemon', label: '⚡ Pokemon' },
-                { id: 'wwe', label: '🤼 WWE' },
                 { id: 'anime', label: '⛩️ Anime' },
+                { id: 'wwe', label: '🤼 WWE' },
+                { id: 'fifa', label: '⚽ FIFA' },
+                { id: 'cars', label: '🏎️ Cars' },
               ].map((f) => (
                 <button
                   key={f.id}

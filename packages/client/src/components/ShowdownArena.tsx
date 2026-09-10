@@ -225,201 +225,230 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
   const isMatchOver = match.phase === 'match_ended';
 
   return (
-    <div className={`relative min-h-[calc(100vh-70px)] flex flex-col justify-between p-3 sm:p-6 select-none overflow-hidden transition-transform duration-150 ${screenShake ? 'scale-[1.02] translate-y-1' : ''}`}>
+    <div className={`relative min-h-[calc(100dvh-64px)] flex flex-col justify-between p-2 sm:p-4 md:p-6 select-none overflow-x-hidden transition-transform duration-150 ${screenShake ? 'scale-[1.01] translate-y-0.5' : ''}`}>
       
       {/* ================= TOP SCOREBOARD ================= */}
-      <div className="w-full max-w-5xl mx-auto flex items-center justify-between p-3 rounded-2xl glass-panel border border-slate-700/80 shadow-xl z-20">
+      <div className="w-full max-w-5xl mx-auto flex items-center justify-between p-2 sm:p-3 rounded-xl sm:rounded-2xl glass-panel border border-slate-700/80 shadow-xl z-20 gap-1 sm:gap-4">
         {/* Opponent Info */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-red-950/80 border border-red-500/80 flex items-center justify-center text-red-400 font-black shadow-md">
-            <Bot className="w-5 h-5" />
+        <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-red-950/80 border border-red-500/80 flex items-center justify-center text-red-400 font-black shadow-md shrink-0">
+            <Bot className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
-          <div>
-            <span className="text-[10px] font-black uppercase text-red-400 block tracking-wider">
-              Computer (AI)
+          <div className="min-w-0">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase text-red-400 block tracking-wider truncate">
+              AI Bot
             </span>
-            <div className="flex items-center gap-2">
-              <span className="text-xl sm:text-2xl font-black font-cinzel text-white">
+            <div className="flex items-center gap-1 sm:gap-2">
+              <span className="text-lg sm:text-2xl font-black font-cinzel text-white">
                 {match.opponentScore}
               </span>
-              <span className="text-xs text-slate-400">Points</span>
+              <span className="text-[10px] sm:text-xs text-slate-400">pts</span>
             </div>
           </div>
         </div>
 
         {/* Round Counter & Realm Badge */}
-        <div className="flex flex-col items-center">
-          <span className="text-xs font-black uppercase tracking-widest text-arena-cyan flex items-center gap-1.5 font-cinzel">
-            <Swords className="w-3.5 h-3.5" /> ROUND {match.round} / {match.maxRounds}
+        <div className="flex flex-col items-center px-1">
+          <span className="text-[10px] sm:text-xs font-black uppercase tracking-widest text-arena-cyan flex items-center gap-1 font-cinzel whitespace-nowrap">
+            <Swords className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> RND {match.round}/{match.maxRounds}
           </span>
-          <div className="flex items-center gap-1.5 mt-1">
+          <div className="flex items-center gap-1 sm:gap-1.5 mt-0.5 sm:mt-1">
             {[1, 2, 3, 4, 5].map((r) => (
               <span
                 key={r}
-                className={`w-3.5 h-2 rounded-full transition-all duration-300 ${
+                className={`w-2.5 sm:w-3.5 h-1.5 sm:h-2 rounded-full transition-all duration-300 ${
                   r < match.round
                     ? 'bg-arena-cyan shadow-sm shadow-arena-cyan'
                     : r === match.round
-                    ? 'bg-white scale-125 animate-pulse'
+                    ? 'bg-white scale-110 animate-pulse'
                     : 'bg-slate-800'
                 }`}
               />
             ))}
           </div>
-          <span className="text-[10px] font-bold text-slate-400 mt-1 uppercase">
+          <span className="text-[8px] sm:text-[10px] font-bold text-slate-400 mt-0.5 uppercase truncate max-w-[100px] sm:max-w-none text-center">
             {universe.name}
           </span>
         </div>
 
         {/* Player Info */}
-        <div className="flex items-center gap-2.5 text-right">
-          <div>
-            <span className="text-[10px] font-black uppercase text-arena-cyan block tracking-wider">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 text-right min-w-0 justify-end">
+          <div className="min-w-0">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase text-arena-cyan block tracking-wider truncate">
               {playerName}
             </span>
-            <div className="flex items-center justify-end gap-2">
-              <span className="text-xl sm:text-2xl font-black font-cinzel text-arena-cyan">
+            <div className="flex items-center justify-end gap-1 sm:gap-2">
+              <span className="text-lg sm:text-2xl font-black font-cinzel text-arena-cyan">
                 {match.playerScore}
               </span>
-              <span className="text-xs text-slate-400">Points</span>
+              <span className="text-[10px] sm:text-xs text-slate-400">pts</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-arena-blue/20 border border-arena-cyan flex items-center justify-center text-arena-cyan font-black shadow-md">
-            <User className="w-5 h-5" />
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-arena-blue/20 border border-arena-cyan flex items-center justify-center text-arena-cyan font-black shadow-md shrink-0">
+            <User className="w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </div>
       </div>
 
       {/* ================= OPPONENT HAND (TOP) ================= */}
-      <div className="w-full flex items-center justify-center gap-2 py-2 z-10">
-        <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mr-2">
-          Computer Hand ({match.opponentHand.length}):
+      <div className="w-full flex items-center justify-center gap-1 sm:gap-2 py-1 sm:py-2 z-10">
+        <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 mr-1 sm:mr-2 shrink-0">
+          AI Hand ({match.opponentHand.length}):
         </span>
-        {match.opponentHand.map((_, i) => (
-          <div
-            key={i}
-            className="w-12 h-16 sm:w-14 sm:h-20 rounded-xl bg-gradient-to-br from-slate-900 via-slate-950 to-red-950/40 border border-slate-700 shadow-md flex items-center justify-center text-slate-600 text-xs font-black transition-transform hover:-translate-y-1"
-          >
-            🎴
-          </div>
-        ))}
+        <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
+          {match.opponentHand.map((_, i) => (
+            <div
+              key={i}
+              className="w-7 h-10 sm:w-11 sm:h-16 md:w-13 md:h-18 rounded-md sm:rounded-xl bg-gradient-to-br from-slate-900 via-slate-950 to-red-950/40 border border-slate-700 shadow-sm flex items-center justify-center text-slate-600 text-[9px] sm:text-xs font-black transition-transform hover:-translate-y-0.5"
+            >
+              🎴
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* ================= CENTER CLASH ARENA ================= */}
-      <div className="relative w-full max-w-5xl mx-auto flex-1 flex flex-col items-center justify-center my-auto py-3 z-20">
+      <div className="relative w-full max-w-5xl mx-auto flex-1 flex flex-col items-center justify-center my-auto py-1 sm:py-2 z-20">
         
         {/* Dynamic Turn Initiative Banners */}
         {match.phase === 'player_turn' && !match.playedPlayerCard && (
-          <div className="text-center animate-bounce mb-3">
+          <div className="text-center animate-bounce mb-2 sm:mb-3 px-2">
             {match.currentLeader === 'opponent' ? (
               match.playedOpponentCard ? (
-                <span className="px-5 py-2 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-300 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/20 flex items-center gap-2">
-                  <Target className="w-4 h-4 text-emerald-400 animate-spin" />
-                  🎯 Computer lost last round and played first! Pick your counter card to crush it!
+                <span className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-300 font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/20 inline-flex items-center gap-1.5 sm:gap-2">
+                  <Target className="w-3.5 h-3.5 text-emerald-400 animate-spin shrink-0" />
+                  <span>AI played! Pick your counter card below!</span>
                 </span>
               ) : (
-                <span className="px-5 py-2 rounded-full bg-red-500/20 border border-red-500 text-red-300 font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg flex items-center gap-2">
-                  <Bot className="w-4 h-4 text-red-400" />
-                  🤖 Computer lost last round and is picking its lead card...
+                <span className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-red-500/20 border border-red-500 text-red-300 font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider shadow-lg inline-flex items-center gap-1.5 sm:gap-2">
+                  <Bot className="w-3.5 h-3.5 text-red-400 shrink-0" />
+                  <span>AI lost last round and is picking lead...</span>
                 </span>
               )
             ) : (
-              <span className="px-5 py-2 rounded-full bg-arena-cyan/20 border border-arena-cyan text-arena-cyan font-black text-xs sm:text-sm uppercase tracking-wider shadow-lg shadow-arena-cyan/20 flex items-center gap-2">
-                <Sparkles className="w-4 h-4" />
-                ⚔️ YOUR TURN TO LEAD: Pick 1 of your {match.playerHand.length} cards below to play!
+              <span className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-arena-cyan/20 border border-arena-cyan text-arena-cyan font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider shadow-lg shadow-arena-cyan/20 inline-flex items-center gap-1.5 sm:gap-2">
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                <span>⚔️ YOUR LEAD: Pick 1 card below to play!</span>
               </span>
             )}
           </div>
         )}
 
         {/* Duel Showcase Pedestals */}
-        <div className="w-full flex flex-col md:flex-row items-center justify-center gap-6 sm:gap-12">
+        <div className="w-full flex flex-row flex-wrap md:flex-nowrap items-center justify-center gap-2 sm:gap-4 md:gap-8">
           
-          {/* Player Card Pedestal (Left) */}
-          <div className="flex flex-col items-center">
-            <span className="text-xs font-black uppercase tracking-wider text-arena-cyan mb-2 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5" />
-              {match.currentLeader === 'player' ? 'Your Lead Card' : 'Your Counter Card'}
+          {/* Player Card Pedestal (Left / order-1) */}
+          <div className="order-1 flex flex-col items-center">
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-arena-cyan mb-1 flex items-center gap-1">
+              <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              {match.currentLeader === 'player' ? 'Your Lead' : 'Your Counter'}
             </span>
             {match.playedPlayerCard ? (
-              <div className="animate-fade-in transform scale-105 transition-all">
-                <Card3D card={match.playedPlayerCard} />
+              <div className="animate-fade-in transform scale-100 sm:scale-105 transition-all">
+                <Card3D card={match.playedPlayerCard} size="responsive" />
               </div>
             ) : (
-              <div className="w-44 h-64 sm:w-48 sm:h-72 rounded-2xl border-2 border-dashed border-arena-cyan/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-xs font-bold gap-2 text-center p-4">
-                <span className="text-3xl opacity-40">⚔️</span>
-                <span>{match.currentLeader === 'opponent' ? 'Awaiting Your Counter' : 'Your Lead Card Goes Here'}</span>
+              <div className="w-28 h-44 sm:w-36 sm:h-56 md:w-44 md:h-68 lg:w-48 lg:h-72 rounded-2xl border-2 border-dashed border-arena-cyan/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-[10px] sm:text-xs font-bold gap-1.5 text-center p-2 sm:p-4">
+                <span className="text-2xl sm:text-3xl opacity-40">⚔️</span>
+                <span className="px-1">{match.currentLeader === 'opponent' ? 'Awaiting Your Counter' : 'Your Lead Card'}</span>
               </div>
             )}
           </div>
 
-          {/* Center VS & Stat Duel Box */}
-          <div className="flex flex-col items-center justify-center max-w-xs w-full">
-            {match.phase === 'opponent_thinking' && (
-              <div className="flex flex-col items-center gap-2 text-center animate-pulse py-6">
-                <div className="w-12 h-12 rounded-full border-4 border-t-red-500 border-slate-700 animate-spin" />
-                <span className="text-xs font-black text-red-400 uppercase tracking-widest">
-                  Computer is countering...
-                </span>
+          {/* VS Divider when not clash reveal */}
+          {match.phase !== 'clash_reveal' && (
+            <div className="order-2 md:order-2 flex items-center justify-center px-1 sm:px-2">
+              {match.phase === 'opponent_thinking' ? (
+                <div className="flex flex-col items-center gap-1 text-center animate-pulse py-2">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-3 sm:border-4 border-t-red-500 border-slate-700 animate-spin" />
+                  <span className="text-[9px] sm:text-xs font-black text-red-400 uppercase tracking-wider">
+                    AI Thinking...
+                  </span>
+                </div>
+              ) : (
+                <div className="w-9 h-9 sm:w-12 sm:h-12 md:w-16 md:h-16 rounded-full bg-slate-900/80 border-2 border-slate-700 flex items-center justify-center text-xs sm:text-base md:text-xl font-black text-slate-400 font-cinzel shadow-inner">
+                  VS
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Opponent Card Pedestal (Right / order-2 or order-3) */}
+          <div className={`${match.phase === 'clash_reveal' ? 'order-2 md:order-3' : 'order-3'} flex flex-col items-center`}>
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-red-400 mb-1 flex items-center gap-1">
+              <Bot className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              {match.currentLeader === 'opponent' ? 'AI Lead' : 'AI Counter'}
+            </span>
+            {match.playedOpponentCard ? (
+              <div className="animate-fade-in transform scale-100 sm:scale-105 transition-all">
+                <Card3D card={match.playedOpponentCard} size="responsive" />
+              </div>
+            ) : (
+              <div className="w-28 h-44 sm:w-36 sm:h-56 md:w-44 md:h-68 lg:w-48 lg:h-72 rounded-2xl border-2 border-dashed border-red-500/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-[10px] sm:text-xs font-bold gap-1.5 text-center p-2 sm:p-4">
+                <span className="text-2xl sm:text-3xl opacity-40">🤖</span>
+                <span className="px-1">{match.currentLeader === 'opponent' ? 'AI Choosing...' : 'Awaiting AI Counter'}</span>
               </div>
             )}
+          </div>
 
-            {match.phase === 'clash_reveal' && result && (
-              <div className="w-full bg-slate-950/95 border border-slate-700 rounded-2xl p-4 shadow-2xl flex flex-col items-center gap-3 animate-fade-in">
-                <span className="text-xs font-black uppercase tracking-wider text-slate-400 font-cinzel">
+          {/* Stat Showdown Box (Center on Desktop, wraps below both cards on Mobile) */}
+          {match.phase === 'clash_reveal' && result && (
+            <div className="order-3 md:order-2 w-full md:w-80 max-w-sm flex flex-col items-center justify-center mt-2 md:mt-0">
+              <div className="w-full bg-slate-950/95 border border-slate-700 rounded-2xl p-2.5 sm:p-4 shadow-2xl flex flex-col items-center gap-2 sm:gap-3 animate-fade-in">
+                <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-slate-400 font-cinzel">
                   STAT SHOWDOWN
                 </span>
 
                 {/* Stat Duels: Attack, Speed, Agility */}
-                <div className="w-full space-y-2 text-xs">
-                  {/* Power / Attack */}
-                  <div className={`flex items-center justify-between p-2 rounded-lg border ${
+                <div className="w-full space-y-1 sm:space-y-2 text-xs">
+                  {/* Attack / Power */}
+                  <div className={`flex items-center justify-between p-1.5 sm:p-2 rounded-lg border ${
                     result.powerDuel.winner === 'player'
                       ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300'
                       : result.powerDuel.winner === 'opponent'
                       ? 'bg-rose-950/40 border-rose-500 text-rose-300'
                       : 'bg-slate-900 border-slate-700 text-slate-300'
                   }`}>
-                    <span className="font-black text-base">{result.powerDuel.playerValue}</span>
-                    <span className="font-bold uppercase tracking-wider flex items-center gap-1 text-[11px]">
+                    <span className="font-black text-sm sm:text-base">{result.powerDuel.playerValue}</span>
+                    <span className="font-bold uppercase tracking-wider flex items-center gap-1 text-[10px] sm:text-[11px]">
                       💥 ATTACK
                     </span>
-                    <span className="font-black text-base">{result.powerDuel.opponentValue}</span>
+                    <span className="font-black text-sm sm:text-base">{result.powerDuel.opponentValue}</span>
                   </div>
 
                   {/* Speed */}
-                  <div className={`flex items-center justify-between p-2 rounded-lg border ${
+                  <div className={`flex items-center justify-between p-1.5 sm:p-2 rounded-lg border ${
                     result.speedDuel.winner === 'player'
                       ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300'
                       : result.speedDuel.winner === 'opponent'
                       ? 'bg-rose-950/40 border-rose-500 text-rose-300'
                       : 'bg-slate-900 border-slate-700 text-slate-300'
                   }`}>
-                    <span className="font-black text-base">{result.speedDuel.playerValue}</span>
-                    <span className="font-bold uppercase tracking-wider flex items-center gap-1 text-[11px]">
+                    <span className="font-black text-sm sm:text-base">{result.speedDuel.playerValue}</span>
+                    <span className="font-bold uppercase tracking-wider flex items-center gap-1 text-[10px] sm:text-[11px]">
                       ⚡ SPEED
                     </span>
-                    <span className="font-black text-base">{result.speedDuel.opponentValue}</span>
+                    <span className="font-black text-sm sm:text-base">{result.speedDuel.opponentValue}</span>
                   </div>
 
                   {/* Agility */}
-                  <div className={`flex items-center justify-between p-2 rounded-lg border ${
+                  <div className={`flex items-center justify-between p-1.5 sm:p-2 rounded-lg border ${
                     result.agilityDuel.winner === 'player'
                       ? 'bg-emerald-950/40 border-emerald-500 text-emerald-300'
                       : result.agilityDuel.winner === 'opponent'
                       ? 'bg-rose-950/40 border-rose-500 text-rose-300'
                       : 'bg-slate-900 border-slate-700 text-slate-300'
                   }`}>
-                    <span className="font-black text-base">{result.agilityDuel.playerValue}</span>
-                    <span className="font-bold uppercase tracking-wider flex items-center gap-1 text-[11px]">
+                    <span className="font-black text-sm sm:text-base">{result.agilityDuel.playerValue}</span>
+                    <span className="font-bold uppercase tracking-wider flex items-center gap-1 text-[10px] sm:text-[11px]">
                       🛡️ AGILITY
                     </span>
-                    <span className="font-black text-base">{result.agilityDuel.opponentValue}</span>
+                    <span className="font-black text-sm sm:text-base">{result.agilityDuel.opponentValue}</span>
                   </div>
                 </div>
 
                 {/* Winner Declaration Banner */}
-                <div className={`w-full py-2 px-3 rounded-xl font-black text-xs uppercase text-center tracking-wider shadow ${
+                <div className={`w-full py-1.5 sm:py-2 px-2 sm:px-3 rounded-xl font-black text-[11px] sm:text-xs uppercase text-center tracking-wider shadow ${
                   result.winner === 'player'
                     ? 'bg-emerald-500 text-slate-950 shadow-emerald-500/30 animate-pulse'
                     : result.winner === 'opponent'
@@ -429,15 +458,15 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                   {result.winner === 'player'
                     ? `🏆 You Won Round ${match.round}! (+1 pt)`
                     : result.winner === 'opponent'
-                    ? `💀 Computer Won Round ${match.round}! (+1 pt)`
+                    ? `💀 AI Won Round ${match.round}! (+1 pt)`
                     : `🤝 Tied Round! (+1 pt each)`}
                 </div>
 
                 {/* Next Turn Initiative Notice */}
-                <div className="text-[10px] text-slate-400 font-bold tracking-wide uppercase text-center">
+                <div className="text-[9px] sm:text-[10px] text-slate-400 font-bold tracking-wide uppercase text-center">
                   {match.round < match.maxRounds && (
                     result.winner === 'player'
-                      ? '🤖 Loser Leads: Computer must play first next round!'
+                      ? '🤖 Loser Leads: AI must play first next round!'
                       : result.winner === 'opponent'
                       ? '⚔️ Loser Leads: You must play first next round!'
                       : '🤝 Tied: Turn initiative alternates!'
@@ -447,68 +476,44 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                 {/* Next Round Button */}
                 <button
                   onClick={handleNextRound}
-                  className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-105 active:scale-95 border border-white cursor-pointer"
+                  className="w-full py-2 sm:py-2.5 px-4 rounded-xl bg-gradient-to-r from-arena-blue to-arena-cyan hover:from-cyan-400 hover:to-white text-slate-950 font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition transform hover:scale-102 active:scale-95 border border-white cursor-pointer"
                 >
                   <span>{match.round >= match.maxRounds ? 'View Final Results ➔' : 'Next Round ➔'}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            )}
-
-            {match.phase === 'player_turn' && (
-              <div className="w-16 h-16 rounded-full bg-slate-900/80 border-2 border-slate-700 flex items-center justify-center text-xl font-black text-slate-400 font-cinzel shadow-inner">
-                VS
-              </div>
-            )}
-          </div>
-
-          {/* Opponent Card Pedestal (Right) */}
-          <div className="flex flex-col items-center">
-            <span className="text-xs font-black uppercase tracking-wider text-red-400 mb-2 flex items-center gap-1.5">
-              <Bot className="w-3.5 h-3.5" />
-              {match.currentLeader === 'opponent' ? 'Computer Lead (Target)' : 'Computer Counter'}
-            </span>
-            {match.playedOpponentCard ? (
-              <div className="animate-fade-in transform scale-105 transition-all">
-                <Card3D card={match.playedOpponentCard} />
-              </div>
-            ) : (
-              <div className="w-44 h-64 sm:w-48 sm:h-72 rounded-2xl border-2 border-dashed border-red-500/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-xs font-bold gap-2 text-center p-4">
-                <span className="text-3xl opacity-40">🤖</span>
-                <span>{match.currentLeader === 'opponent' ? 'Computer Choosing Lead...' : 'Awaiting Computer Counter'}</span>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
 
       {/* ================= PLAYER HAND (BOTTOM) ================= */}
-      <div className="w-full max-w-5xl mx-auto flex flex-col items-center pt-3 border-t border-slate-800/80 z-20">
-        <div className="flex items-center justify-between w-full mb-2 px-2">
-          <span className="text-xs font-black uppercase tracking-wider text-arena-cyan">
-            Your Hand ({match.playerHand.length} cards remaining):
+      <div className="w-full max-w-5xl mx-auto flex flex-col items-center pt-2 sm:pt-3 border-t border-slate-800/80 z-20">
+        <div className="flex items-center justify-between w-full mb-1 sm:mb-2 px-2">
+          <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-arena-cyan">
+            Your Hand ({match.playerHand.length} cards):
           </span>
-          <span className="text-[11px] text-slate-400 italic">
+          <span className="text-[10px] sm:text-[11px] text-slate-400 italic truncate max-w-[200px] sm:max-w-none">
             {match.currentLeader === 'opponent' && match.playedOpponentCard
-              ? '🎯 Pick the best counter card to defeat the Computer\'s card!'
-              : 'Click any card to play it into battle!'}
+              ? '🎯 Pick the best counter card to defeat AI!'
+              : 'Click any card to play it!'}
           </span>
         </div>
 
-        <div className="flex items-center justify-center gap-3 sm:gap-5 overflow-x-auto w-full py-2 px-2">
+        <div className="flex items-center justify-start sm:justify-center gap-2 sm:gap-4 overflow-x-auto no-scrollbar snap-x w-full py-1.5 sm:py-2 px-1">
           {match.playerHand.map((card) => {
             const isClickable = match.phase === 'player_turn' && (match.currentLeader === 'player' || Boolean(match.playedOpponentCard));
             return (
               <div
                 key={card.id}
                 onClick={() => isClickable && handlePlayCard(card)}
-                className={`transform transition-all duration-200 ${
+                className={`flex-shrink-0 snap-center transform transition-all duration-200 ${
                   isClickable
                     ? 'cursor-pointer hover:scale-105 hover:-translate-y-2'
                     : 'opacity-50 pointer-events-none'
                 }`}
               >
-                <Card3D card={card} isPlayable={isClickable} />
+                <Card3D card={card} isPlayable={isClickable} size="responsive" />
               </div>
             );
           })}

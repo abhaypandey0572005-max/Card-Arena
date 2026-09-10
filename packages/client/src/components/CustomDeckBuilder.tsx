@@ -111,7 +111,7 @@ export const CustomDeckBuilder: React.FC<CustomDeckBuilderProps> = ({
               Hybrid Deck Studio
             </h1>
             <p className="text-xs text-slate-400 font-semibold">
-              Build a custom 14-card deck mixing Marvel, DC, Pokemon, WWE & Anime!
+              Build a custom 14-card deck mixing Marvel, DC, Pokemon, WWE, Anime, FIFA & Cars!
             </p>
           </div>
         </div>
@@ -138,8 +138,10 @@ export const CustomDeckBuilder: React.FC<CustomDeckBuilderProps> = ({
               { id: 'marvel', label: '🦸 Marvel' },
               { id: 'dc', label: '🦇 DC' },
               { id: 'pokemon', label: '⚡ Pokemon' },
-              { id: 'wwe', label: '🤼 WWE' },
               { id: 'anime', label: '⛩️ Anime' },
+              { id: 'wwe', label: '🤼 WWE' },
+              { id: 'fifa', label: '⚽ FIFA' },
+              { id: 'cars', label: '🏎️ Cars' },
             ].map((tab) => (
               <button
                 key={tab.id}

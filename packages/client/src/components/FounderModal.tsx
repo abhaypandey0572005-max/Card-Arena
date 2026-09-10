@@ -86,7 +86,7 @@ export const FounderModal: React.FC<FounderModalProps> = ({ onClose }) => {
         <div className="relative z-10 space-y-3.5 text-xs text-slate-300 font-medium leading-relaxed mb-6">
           <div className="p-4 rounded-2xl bg-slate-950/80 border border-slate-800/90 shadow-inner">
             <p className="text-slate-200">
-              <strong className="text-amber-400">CARD ARENA</strong> was conceived, designed, and engineered from scratch by <strong className="text-white">Abhay Pandey</strong>. Driven by a deep love for pop-culture multiverses, gaming mechanics, and real-time multiplayer systems, Abhay united <strong className="text-arena-cyan">Marvel</strong>, <strong className="text-arena-blue">DC</strong>, <strong className="text-amber-400">Pokemon</strong>, <strong className="text-rose-400">WWE</strong>, and <strong className="text-yellow-400">Anime</strong> into a deterministic, high-octane web card battler.
+              <strong className="text-amber-400">CARD ARENA</strong> was conceived, designed, and engineered from scratch by <strong className="text-white">Abhay Pandey</strong>. Driven by a deep love for pop-culture multiverses, gaming mechanics, and real-time multiplayer systems, Abhay united <strong className="text-arena-cyan">Marvel</strong>, <strong className="text-arena-blue">DC</strong>, <strong className="text-amber-400">Pokemon</strong>, <strong className="text-rose-400">WWE</strong>, <strong className="text-yellow-400">Anime</strong>, <strong className="text-emerald-400">FIFA</strong>, and <strong className="text-red-400">Pixar's Cars</strong> into a deterministic, high-octane web card battler.
             </p>
           </div>
 
@@ -123,8 +123,8 @@ export const FounderModal: React.FC<FounderModalProps> = ({ onClose }) => {
               <Layers className="w-5 h-5 text-purple-400 shrink-0 mt-0.5" />
               <div>
                 <span className="text-[10px] text-slate-400 block uppercase font-bold">Multiverse Roster</span>
-                <span className="font-bold text-xs text-slate-200">60 Balanced Cards</span>
-                <p className="text-[10px] text-slate-400 mt-0.5">Exactly 12 balanced minions per universe with HD art.</p>
+                <span className="font-bold text-xs text-slate-200">84 Balanced Cards</span>
+                <p className="text-[10px] text-slate-400 mt-0.5">Exactly 12 balanced minions across 7 universes with HD art.</p>
               </div>
             </div>
           </div>
