@@ -222,11 +222,17 @@ export class GatewayService {
             }
 
             case 'JOIN_CUSTOM_ROOM': {
-              let formattedCode = message.payload.roomCode.trim().toUpperCase();
-              if (formattedCode.includes('?ROOM=')) {
-                formattedCode = formattedCode.split('?ROOM=')[1].split('&')[0];
+              let rawCode = message.payload.roomCode || '';
+              let formattedCode = rawCode.trim().toUpperCase();
+              if (formattedCode.includes('ROOM=')) {
+                const match = formattedCode.match(/ROOM=([A-Z0-9_-]+)/i);
+                if (match) formattedCode = match[1];
               }
-              if (!formattedCode.startsWith('ARENA-') && /^\d+$/.test(formattedCode)) {
+              formattedCode = formattedCode.replace(/[^A-Z0-9]/g, '');
+              if (formattedCode.startsWith('ARENA')) {
+                formattedCode = formattedCode.substring(5);
+              }
+              if (formattedCode.length > 0) {
                 formattedCode = `ARENA-${formattedCode}`;
               }
               const lobby = this.customLobbies.get(formattedCode);
@@ -289,7 +295,16 @@ export class GatewayService {
             }
 
             case 'START_CUSTOM_MATCH': {
-              const lobby = this.customLobbies.get(message.payload.roomCode);
+              let code = (message.payload.roomCode || '').trim().toUpperCase();
+              if (code.includes('ROOM=')) {
+                const match = code.match(/ROOM=([A-Z0-9_-]+)/i);
+                if (match) code = match[1];
+              }
+              code = code.replace(/[^A-Z0-9]/g, '');
+              if (code.startsWith('ARENA')) code = code.substring(5);
+              if (code.length > 0) code = `ARENA-${code}`;
+
+              const lobby = this.customLobbies.get(code) || this.customLobbies.get(message.payload.roomCode);
               if (!lobby || !lobby.guest) {
                 this.send(extWs, {
                   type: 'ERROR',
@@ -413,9 +428,31 @@ export class GatewayService {
           const lobby = this.customLobbies.get(extWs.currentRoomCode);
           if (lobby) {
             if (lobby.host.socketId === extWs.id) {
+              if (lobby.guest) {
+                const guestWs = this.clients.get(lobby.guest.socketId);
+                if (guestWs) {
+                  this.send(guestWs, {
+                    type: 'ERROR',
+                    payload: { message: 'Host left the private room.' },
+                  });
+                }
+              }
               this.customLobbies.delete(extWs.currentRoomCode);
             } else if (lobby.guest?.socketId === extWs.id) {
               lobby.guest = undefined;
+              const hostWs = this.clients.get(lobby.host.socketId);
+              if (hostWs) {
+                this.send(hostWs, {
+                  type: 'CUSTOM_ROOM_STATE',
+                  payload: {
+                    roomCode: lobby.roomCode,
+                    host: lobby.host,
+                    guest: undefined,
+                    isHost: true,
+                    myPlayerId: lobby.host.playerId,
+                  },
+                });
+              }
             }
           }
         }

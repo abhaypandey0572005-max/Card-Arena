@@ -596,6 +596,7 @@ export const App: React.FC = () => {
           initialRoomCode={initialUrlRoomCode}
           isConnected={isConnected}
           errorMessage={lastError}
+          onSelectDeck={(deckId) => setSelectedDeckId(deckId)}
         />
       )}
 

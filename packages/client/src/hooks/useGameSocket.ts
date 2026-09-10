@@ -43,7 +43,7 @@ export function useGameSocket() {
     }
   }, []);
 
-  // Connect to WebSocket
+  // Connect to WebSocket with resilient auto-reconnect
   useEffect(() => {
     let wsUrl = '';
     const metaEnv = (import.meta as unknown as { env?: Record<string, string | undefined> }).env || {};
@@ -65,110 +65,150 @@ export function useGameSocket() {
       wsUrl = `${protocol}//${window.location.host}/ws`;
     }
 
-    console.log('Connecting to WebSocket at:', wsUrl);
-    const ws = new WebSocket(wsUrl);
-    socketRef.current = ws;
+    let isUnmounted = false;
+    let reconnectTimeout: NodeJS.Timeout | null = null;
+    let reconnectAttempts = 0;
 
-    ws.onopen = () => {
-      setIsConnected(true);
-      setLastError(null);
-
-      // Flush any messages buffered during connection establishment
-      while (pendingMessagesRef.current.length > 0) {
-        const queuedMsg = pendingMessagesRef.current.shift();
-        if (queuedMsg) {
-          console.log('Flushing buffered message:', queuedMsg.type);
-          ws.send(JSON.stringify(queuedMsg));
-        }
-      }
-
-      // Start ping interval with RTT measurement
-      pingIntervalRef.current = setInterval(() => {
-        lastPingTimeRef.current = Date.now();
-        sendMessage({ type: 'PING' });
-      }, 10000);
-    };
-
-    ws.onmessage = (event) => {
+    const connect = () => {
+      if (isUnmounted) return;
+      console.log('Connecting to WebSocket at:', wsUrl);
+      
       try {
-        const msg: ServerMessage = JSON.parse(event.data);
+        const ws = new WebSocket(wsUrl);
+        socketRef.current = ws;
 
-        switch (msg.type) {
-          case 'QUEUE_STATUS':
-            setQueueState((prev) => ({
-              ...prev,
-              inQueue: msg.payload.inQueue,
-              queuePosition: msg.payload.queuePosition,
-            }));
-            break;
+        ws.onopen = () => {
+          if (isUnmounted) {
+            ws.close();
+            return;
+          }
+          console.log('WebSocket connected successfully');
+          setIsConnected(true);
+          setLastError(null);
+          reconnectAttempts = 0;
 
-          case 'MATCH_FOUND':
-            setQueueState({ inQueue: false, timeInQueue: 0 });
-            setCustomLobbyState(null);
-            if (msg.payload.yourPlayerId) {
-              setMyPlayerId(msg.payload.yourPlayerId);
+          // Flush any messages buffered during connection establishment
+          while (pendingMessagesRef.current.length > 0) {
+            const queuedMsg = pendingMessagesRef.current.shift();
+            if (queuedMsg && ws.readyState === WebSocket.OPEN) {
+              console.log('Flushing buffered message:', queuedMsg.type);
+              ws.send(JSON.stringify(queuedMsg));
             }
-            break;
+          }
 
-          case 'CUSTOM_ROOM_STATE':
-            setCustomLobbyState(msg.payload);
-            if (msg.payload.myPlayerId) {
-              setMyPlayerId(msg.payload.myPlayerId);
+          // Start ping interval with RTT measurement
+          if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+          pingIntervalRef.current = setInterval(() => {
+            if (ws.readyState === WebSocket.OPEN) {
+              lastPingTimeRef.current = Date.now();
+              ws.send(JSON.stringify({ type: 'PING' }));
             }
-            break;
+          }, 10000);
+        };
 
-          case 'GAME_STATE':
-            setGameState(msg.payload);
-            break;
+        ws.onmessage = (event) => {
+          try {
+            const msg: ServerMessage = JSON.parse(event.data);
 
-          case 'ACTION_CONFIRMED':
-            // Action validated by authoritative engine and written to Redis
-            break;
+            switch (msg.type) {
+              case 'QUEUE_STATUS':
+                setQueueState((prev) => ({
+                  ...prev,
+                  inQueue: msg.payload.inQueue,
+                  queuePosition: msg.payload.queuePosition,
+                }));
+                break;
 
-          case 'ACTION_REJECTED':
-            setLastError(msg.payload.reason);
-            setTimeout(() => setLastError(null), 3500);
+              case 'MATCH_FOUND':
+                setQueueState({ inQueue: false, timeInQueue: 0 });
+                setCustomLobbyState(null);
+                if (msg.payload.yourPlayerId) {
+                  setMyPlayerId(msg.payload.yourPlayerId);
+                }
+                break;
 
-            // Immediate state resync if server provided fresh authoritative state
-            if (msg.payload.currentState) {
-              setGameState(msg.payload.currentState);
-            } else if (gameState?.roomId) {
-              sendMessage({ type: 'SYNC_STATE', payload: { roomId: gameState.roomId } });
+              case 'CUSTOM_ROOM_STATE':
+                setCustomLobbyState(msg.payload);
+                if (msg.payload.myPlayerId) {
+                  setMyPlayerId(msg.payload.myPlayerId);
+                }
+                break;
+
+              case 'GAME_STATE':
+                setGameState(msg.payload);
+                break;
+
+              case 'ACTION_CONFIRMED':
+                break;
+
+              case 'ACTION_REJECTED':
+                setLastError(msg.payload.reason);
+                setTimeout(() => setLastError(null), 3500);
+
+                if (msg.payload.currentState) {
+                  setGameState(msg.payload.currentState);
+                }
+                break;
+
+              case 'ERROR':
+                setLastError(msg.payload.message);
+                if (
+                  msg.payload.message.includes('closed') ||
+                  msg.payload.message.includes('left') ||
+                  msg.payload.message.includes('not found')
+                ) {
+                  setCustomLobbyState(null);
+                }
+                setTimeout(() => setLastError(null), 4000);
+                break;
+
+              case 'PONG':
+                if (lastPingTimeRef.current > 0) {
+                  setLatency(Date.now() - lastPingTimeRef.current);
+                }
+                break;
             }
-            break;
+          } catch (err) {
+            console.error('Failed to parse WebSocket message', err);
+          }
+        };
 
-          case 'ERROR':
-            setLastError(msg.payload.message);
-            setTimeout(() => setLastError(null), 4000);
-            break;
+        ws.onclose = () => {
+          setIsConnected(false);
+          if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
+          if (!isUnmounted) {
+            reconnectAttempts++;
+            const delay = Math.min(1000 * reconnectAttempts, 4000);
+            console.log(`WebSocket closed. Reconnecting in ${delay}ms (attempt ${reconnectAttempts})...`);
+            reconnectTimeout = setTimeout(connect, delay);
+          }
+        };
 
-          case 'PONG':
-            if (lastPingTimeRef.current > 0) {
-              setLatency(Date.now() - lastPingTimeRef.current);
-            }
-            break;
-        }
+        ws.onerror = (err) => {
+          console.error('WebSocket encountered an error', err);
+          setIsConnected(false);
+        };
       } catch (err) {
-        console.error('Failed to parse WebSocket message', err);
+        console.error('Failed to create WebSocket instance', err);
+        if (!isUnmounted) {
+          reconnectAttempts++;
+          reconnectTimeout = setTimeout(connect, 2000);
+        }
       }
     };
 
-    ws.onclose = () => {
-      setIsConnected(false);
-      if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
-    };
-
-    ws.onerror = (err) => {
-      console.error('WebSocket encountered an error', err);
-      setIsConnected(false);
-    };
+    connect();
 
     return () => {
+      isUnmounted = true;
+      if (reconnectTimeout) clearTimeout(reconnectTimeout);
       if (pingIntervalRef.current) clearInterval(pingIntervalRef.current);
       if (queueTimerRef.current) clearInterval(queueTimerRef.current);
-      ws.close();
+      if (socketRef.current) {
+        socketRef.current.close();
+      }
     };
-  }, [sendMessage, gameState?.roomId]);
+  }, []);
 
   // Queue timer ticker
   useEffect(() => {
