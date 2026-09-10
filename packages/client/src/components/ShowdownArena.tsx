@@ -27,9 +27,13 @@ import {
   Target
 } from 'lucide-react';
 
+import { recordMatchResult } from '../utils/ranks.js';
+
 interface ShowdownArenaProps {
   universeId: string;
   playerName: string;
+  opponentName?: string;
+  isQuickMatch?: boolean;
   onExit: () => void;
   onChangeUniverse: () => void;
 }
@@ -37,12 +41,16 @@ interface ShowdownArenaProps {
 export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
   universeId,
   playerName,
+  opponentName,
+  isQuickMatch = false,
   onExit,
   onChangeUniverse,
 }) => {
+  const opponentDisplayName = opponentName || (isQuickMatch ? 'Rival Pilot' : 'Computer (AI)');
   const [match, setMatch] = useState<ShowdownMatchState>(() => initShowdownMatch(universeId));
   const [screenShake, setScreenShake] = useState(false);
   const [showStatBars, setShowStatBars] = useState(false);
+  const [mmrResult, setMmrResult] = useState<{ newMmr: number; mmrChange: number } | null>(null);
 
   const universe = UNIVERSES.find((u) => u.id === universeId) || UNIVERSES[0];
 
@@ -181,6 +189,12 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
         matchWinner = 'opponent';
       }
 
+      if (isQuickMatch) {
+        const resultOutcome = matchWinner === 'player' ? 'win' : matchWinner === 'opponent' ? 'loss' : 'draw';
+        const res = recordMatchResult(resultOutcome, opponentDisplayName, universe.name);
+        setMmrResult(res);
+      }
+
       setMatch((prev) => ({
         ...prev,
         phase: 'match_ended',
@@ -231,13 +245,24 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
       <div className="w-full max-w-5xl mx-auto flex items-center justify-between p-2 sm:p-3 rounded-xl sm:rounded-2xl glass-panel border border-slate-700/80 shadow-xl z-20 gap-1 sm:gap-4">
         {/* Opponent Info */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-red-950/80 border border-red-500/80 flex items-center justify-center text-red-400 font-black shadow-md shrink-0">
-            <Bot className="w-4 h-4 sm:w-5 sm:h-5" />
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl ${
+            isQuickMatch
+              ? 'bg-gradient-to-br from-indigo-950 to-purple-950 border border-purple-500/80 text-purple-300'
+              : 'bg-red-950/80 border border-red-500/80 text-red-400'
+          } flex items-center justify-center font-black shadow-md shrink-0`}>
+            {isQuickMatch ? <Swords className="w-4 h-4 sm:w-5 sm:h-5" /> : <Bot className="w-4 h-4 sm:w-5 sm:h-5" />}
           </div>
           <div className="min-w-0">
-            <span className="text-[9px] sm:text-[10px] font-black uppercase text-red-400 block tracking-wider truncate">
-              AI Bot
-            </span>
+            <div className="flex items-center gap-1">
+              <span className={`text-[9px] sm:text-[10px] font-black uppercase ${isQuickMatch ? 'text-purple-300' : 'text-red-400'} block tracking-wider truncate`}>
+                {opponentDisplayName}
+              </span>
+              {isQuickMatch && (
+                <span className="px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[7px] font-mono font-bold shrink-0">
+                  ● PvP
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-1 sm:gap-2">
               <span className="text-lg sm:text-2xl font-black font-cinzel text-white">
                 {match.opponentScore}
@@ -293,7 +318,7 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
       {/* ================= OPPONENT HAND (TOP) ================= */}
       <div className="w-full flex items-center justify-center gap-1 sm:gap-2 py-1 sm:py-2 z-10">
         <span className="text-[9px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-500 mr-1 sm:mr-2 shrink-0">
-          AI Hand ({match.opponentHand.length}):
+          {opponentDisplayName} Hand ({match.opponentHand.length}):
         </span>
         <div className="flex items-center gap-1 sm:gap-2 overflow-hidden">
           {match.opponentHand.map((_, i) => (
@@ -317,12 +342,12 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
               match.playedOpponentCard ? (
                 <span className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-emerald-500/20 border-2 border-emerald-400 text-emerald-300 font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider shadow-lg shadow-emerald-500/20 inline-flex items-center gap-1.5 sm:gap-2">
                   <Target className="w-3.5 h-3.5 text-emerald-400 animate-spin shrink-0" />
-                  <span>AI played! Pick your counter card below!</span>
+                  <span>{opponentDisplayName} played! Pick your counter card below!</span>
                 </span>
               ) : (
                 <span className="px-3 sm:px-5 py-1.5 sm:py-2 rounded-full bg-red-500/20 border border-red-500 text-red-300 font-black text-[10px] sm:text-xs md:text-sm uppercase tracking-wider shadow-lg inline-flex items-center gap-1.5 sm:gap-2">
-                  <Bot className="w-3.5 h-3.5 text-red-400 shrink-0" />
-                  <span>AI lost last round and is picking lead...</span>
+                  {isQuickMatch ? <Swords className="w-3.5 h-3.5 text-purple-400 shrink-0" /> : <Bot className="w-3.5 h-3.5 text-red-400 shrink-0" />}
+                  <span>{opponentDisplayName} lost last round and is picking lead...</span>
                 </span>
               )
             ) : (
@@ -375,9 +400,9 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
 
           {/* Opponent Card Pedestal (Right / order-2 or order-3) */}
           <div className={`${match.phase === 'clash_reveal' ? 'order-2 md:order-3' : 'order-3'} flex flex-col items-center`}>
-            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider text-red-400 mb-1 flex items-center gap-1">
-              <Bot className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-              {match.currentLeader === 'opponent' ? 'AI Lead' : 'AI Counter'}
+            <span className={`text-[10px] sm:text-xs font-black uppercase tracking-wider ${isQuickMatch ? 'text-purple-400' : 'text-red-400'} mb-1 flex items-center gap-1`}>
+              {isQuickMatch ? <Swords className="w-3 h-3 sm:w-3.5 sm:h-3.5" /> : <Bot className="w-3 h-3 sm:w-3.5 sm:h-3.5" />}
+              {match.currentLeader === 'opponent' ? `${opponentDisplayName} Lead` : `${opponentDisplayName} Counter`}
             </span>
             {match.playedOpponentCard ? (
               <div className="animate-fade-in transform scale-100 sm:scale-105 transition-all">
@@ -385,8 +410,8 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
               </div>
             ) : (
               <div className="w-28 h-44 sm:w-36 sm:h-56 md:w-44 md:h-68 lg:w-48 lg:h-72 rounded-2xl border-2 border-dashed border-red-500/40 bg-slate-950/40 flex flex-col items-center justify-center text-slate-500 text-[10px] sm:text-xs font-bold gap-1.5 text-center p-2 sm:p-4">
-                <span className="text-2xl sm:text-3xl opacity-40">🤖</span>
-                <span className="px-1">{match.currentLeader === 'opponent' ? 'AI Choosing...' : 'Awaiting AI Counter'}</span>
+                <span className="text-2xl sm:text-3xl opacity-40">{isQuickMatch ? '⚔️' : '🤖'}</span>
+                <span className="px-1">{match.currentLeader === 'opponent' ? `${opponentDisplayName} Choosing...` : `Awaiting ${opponentDisplayName} Counter`}</span>
               </div>
             )}
           </div>
@@ -458,7 +483,7 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                   {result.winner === 'player'
                     ? `🏆 You Won Round ${match.round}! (+1 pt)`
                     : result.winner === 'opponent'
-                    ? `💀 AI Won Round ${match.round}! (+1 pt)`
+                    ? `💀 ${opponentDisplayName} Won Round ${match.round}! (+1 pt)`
                     : `🤝 Tied Round! (+1 pt each)`}
                 </div>
 
@@ -466,7 +491,7 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
                 <div className="text-[9px] sm:text-[10px] text-slate-400 font-bold tracking-wide uppercase text-center">
                   {match.round < match.maxRounds && (
                     result.winner === 'player'
-                      ? '🤖 Loser Leads: AI must play first next round!'
+                      ? `🤖 Loser Leads: ${opponentDisplayName} must play first next round!`
                       : result.winner === 'opponent'
                       ? '⚔️ Loser Leads: You must play first next round!'
                       : '🤝 Tied: Turn initiative alternates!'
@@ -495,7 +520,7 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
           </span>
           <span className="text-[10px] sm:text-[11px] text-slate-400 italic truncate max-w-[200px] sm:max-w-none">
             {match.currentLeader === 'opponent' && match.playedOpponentCard
-              ? '🎯 Pick the best counter card to defeat AI!'
+              ? `🎯 Pick the best counter card to defeat ${opponentDisplayName}!`
               : 'Click any card to play it!'}
           </span>
         </div>
@@ -538,24 +563,35 @@ export const ShowdownArena: React.FC<ShowdownArenaProps> = ({
 
             <p className="text-sm text-slate-300 mt-2">
               {match.matchWinner === 'player'
-                ? `Outstanding strategy! You triumphed over the Computer ${match.playerScore} to ${match.opponentScore}!`
+                ? `Outstanding strategy! You triumphed over ${opponentDisplayName} ${match.playerScore} to ${match.opponentScore}!`
                 : match.matchWinner === 'opponent'
-                ? `The Computer edged out the victory ${match.opponentScore} to ${match.playerScore}. Rematch for glory!`
+                ? `${opponentDisplayName} edged out the victory ${match.opponentScore} to ${match.playerScore}. Rematch for glory!`
                 : `A rare warrior stalemate! Both champions finished ${match.playerScore} to ${match.opponentScore}!`}
             </p>
 
             {/* Scorecard */}
-            <div className="flex items-center justify-center gap-8 my-6 py-3 px-6 rounded-2xl bg-slate-900 border border-slate-800 w-full">
+            <div className="flex items-center justify-center gap-8 my-5 py-3 px-6 rounded-2xl bg-slate-900 border border-slate-800 w-full">
               <div>
                 <span className="text-[10px] font-black uppercase text-arena-cyan block">YOU</span>
                 <span className="text-3xl font-black text-white font-cinzel">{match.playerScore}</span>
               </div>
               <span className="text-xl font-black text-slate-600 font-cinzel">-</span>
               <div>
-                <span className="text-[10px] font-black uppercase text-red-400 block">COMPUTER</span>
+                <span className="text-[10px] font-black uppercase text-purple-400 block truncate max-w-[120px]">{opponentDisplayName.toUpperCase()}</span>
                 <span className="text-3xl font-black text-white font-cinzel">{match.opponentScore}</span>
               </div>
             </div>
+
+            {/* MMR Rating Change Pill for Quick Match */}
+            {isQuickMatch && mmrResult && (
+              <div className="mb-4 px-4 py-2 rounded-2xl bg-amber-500/10 border border-amber-400/40 text-xs font-black text-amber-300 flex items-center gap-2 shadow-md">
+                <Trophy className="w-4 h-4 text-arena-gold" />
+                <span>Leaderboard MMR: {mmrResult.newMmr}</span>
+                <span className={mmrResult.mmrChange >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                  ({mmrResult.mmrChange >= 0 ? `+${mmrResult.mmrChange}` : mmrResult.mmrChange})
+                </span>
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex flex-col gap-2.5 w-full">

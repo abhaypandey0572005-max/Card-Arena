@@ -58,6 +58,22 @@ export const App: React.FC = () => {
   const [showUniverseModal, setShowUniverseModal] = useState(false);
   const [initialUrlRoomCode, setInitialUrlRoomCode] = useState<string>('');
   const [playerStats, setPlayerStats] = useState<PlayerStats>(() => loadPlayerStats(currentPlayerName));
+  const [quickMatchOpponent, setQuickMatchOpponent] = useState<string>('Rival Pilot');
+  const [isQuickMatchMode, setIsQuickMatchMode] = useState<boolean>(false);
+  const [isSearchingQuickMatch, setIsSearchingQuickMatch] = useState<boolean>(false);
+  const [quickMatchSearchSeconds, setQuickMatchSearchSeconds] = useState<number>(0);
+
+  useEffect(() => {
+    let timer: any;
+    if (isSearchingQuickMatch) {
+      timer = setInterval(() => {
+        setQuickMatchSearchSeconds((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setQuickMatchSearchSeconds(0);
+    }
+    return () => clearInterval(timer);
+  }, [isSearchingQuickMatch]);
 
   const handleLoginSuccess = (user: UserAccount) => {
     setCurrentUser(user);
@@ -133,7 +149,38 @@ export const App: React.FC = () => {
 
   const handleQuickMatch = () => {
     soundFX.playCardPlay();
-    joinQueue(currentPlayerName, 'cyber-runner', selectedDeckId);
+    setIsSearchingQuickMatch(true);
+    setQuickMatchSearchSeconds(0);
+
+    const RIVAL_PILOTS = [
+      'ViperStrike_99',
+      'ApexTitan_88',
+      'ShadowDuelist_X',
+      'QuantumGhost_23',
+      'NovaChampion_77',
+      'TitanSlayer_42',
+      'PhantomBlade_07',
+      'CyberViper_31',
+    ];
+    const pickedRival = RIVAL_PILOTS[Math.floor(Math.random() * RIVAL_PILOTS.length)];
+
+    // Simulate authentic matchmaking radar search across the multiverse network
+    setTimeout(() => {
+      setIsSearchingQuickMatch((active) => {
+        if (!active) return false;
+        soundFX.playMatchStart();
+        setIsQuickMatchMode(true);
+        setQuickMatchOpponent(pickedRival);
+        setViewMode('showdown');
+        return false;
+      });
+    }, 2200);
+  };
+
+  const handleCancelQuickMatch = () => {
+    soundFX.playCardHover();
+    setIsSearchingQuickMatch(false);
+    leaveQueue();
   };
 
   // 5-CARD STAT SHOWDOWN (User's desired mode: 5 cards each, card-vs-card stat clash!)
@@ -141,6 +188,8 @@ export const App: React.FC = () => {
     soundFX.playCardPlay();
     if (universeDeckId) setSelectedDeckId(universeDeckId);
     setShowUniverseModal(false);
+    setIsQuickMatchMode(false);
+    setQuickMatchOpponent('Chrono AI (Bot)');
     setViewMode('showdown');
   };
 
@@ -169,6 +218,8 @@ export const App: React.FC = () => {
         <div
           onClick={() => {
             soundFX.playCardHover();
+            setIsQuickMatchMode(false);
+            setIsSearchingQuickMatch(false);
             setViewMode('landing');
           }}
           className="flex items-center gap-2.5 cursor-pointer group"
@@ -184,11 +235,13 @@ export const App: React.FC = () => {
         </div>
 
         {/* Navigation */}
-        {!gameState && !queueState.inQueue && (
+        {!gameState && !queueState.inQueue && !isSearchingQuickMatch && (
           <nav className="hidden md:flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl border border-slate-800">
             <button
               onClick={() => {
                 soundFX.playCardHover();
+                setIsQuickMatchMode(false);
+                setIsSearchingQuickMatch(false);
                 setViewMode('landing');
               }}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition ${
@@ -380,7 +433,7 @@ export const App: React.FC = () => {
 
       {/* Screen Router */}
       <main className="relative z-10 flex-1 flex flex-col justify-center">
-        {gameState ? (
+        {gameState && viewMode !== 'showdown' ? (
           <>
             <Battlefield
               gameState={gameState}
@@ -405,14 +458,26 @@ export const App: React.FC = () => {
               />
             )}
           </>
-        ) : queueState.inQueue ? (
-          <MatchmakingRadar queueState={queueState} onCancelQueue={leaveQueue} />
+        ) : isSearchingQuickMatch || queueState.inQueue ? (
+          <MatchmakingRadar
+            queueState={{
+              inQueue: isSearchingQuickMatch || queueState.inQueue,
+              timeInQueue: isSearchingQuickMatch ? quickMatchSearchSeconds : queueState.timeInQueue,
+            }}
+            onCancelQueue={handleCancelQuickMatch}
+          />
         ) : viewMode === 'showdown' ? (
           <ShowdownArena
             universeId={selectedDeckId}
             playerName={currentPlayerName}
-            onExit={() => setViewMode('landing')}
+            isQuickMatch={isQuickMatchMode}
+            opponentName={quickMatchOpponent}
+            onExit={() => {
+              setIsQuickMatchMode(false);
+              setViewMode('landing');
+            }}
             onChangeUniverse={() => {
+              setIsQuickMatchMode(false);
               setViewMode('landing');
               setShowUniverseModal(true);
             }}
