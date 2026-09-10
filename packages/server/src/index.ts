@@ -16,13 +16,25 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
+const httpServer = createServer(app);
+const { gateway, gameEngine, matchmaker, roomManager, redis } = createGameWebSocketServer(httpServer);
+
 // Health Check API
 app.get('/api/health', (_req, res) => {
   res.json({
     status: 'online',
     timestamp: Date.now(),
-    engine: 'Authoritative Real-Time Card Game Engine',
-    version: '1.0.0',
+    engine: 'Authoritative Real-Time Multiplayer Microservices Engine',
+    version: '2.0.0',
+    redis: {
+      mode: redis.mode,
+      ready: redis.isClusterReady,
+    },
+    microservices: {
+      gateway: 'active',
+      matchmaker: 'active',
+      gameEngine: 'active',
+    },
   });
 });
 
@@ -36,13 +48,18 @@ app.get('/api/decks', (_req, res) => {
   res.json({ decks: PRESET_DECKS });
 });
 
-const httpServer = createServer(app);
-const { roomManager, matchmaker } = createGameWebSocketServer(httpServer);
-
 // Server Metrics API
-app.get('/api/metrics', (_req, res) => {
+app.get('/api/metrics', async (_req, res) => {
+  const queuedPlayers = await matchmaker.getQueueLength();
+  const activeRooms = roomManager.getActiveRoomCount();
+  const connectedClients = gateway.getConnectedClientsCount();
+  const customLobbies = gateway.getCustomLobbiesCount();
   res.json({
-    queuedPlayers: matchmaker.getQueueLength(),
+    queuedPlayers,
+    activeRooms,
+    connectedClients,
+    customLobbies,
+    redisMode: redis.mode,
     timestamp: Date.now(),
   });
 });

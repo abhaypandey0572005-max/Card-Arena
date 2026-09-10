@@ -131,6 +131,7 @@ export function createInitialGameState(
 
   const state: GameState = {
     roomId,
+    stateVersion: 1,
     turn: 1,
     turnStartTime: Date.now(),
     turnDurationSeconds: TURN_DURATION_SECONDS,

@@ -26,6 +26,7 @@ export type ClientMessage =
   | { type: 'START_CUSTOM_MATCH'; payload: { roomCode: string } }
   | { type: 'START_AI_MATCH'; payload: { playerName: string; avatar: string; deckId: string; aiDeckId?: string } }
   | { type: 'GAME_ACTION'; payload: PlayerActionPayload }
+  | { type: 'SYNC_STATE'; payload: { roomId: string } }
   | { type: 'PING' };
 
 // Server to Client Messages
@@ -34,7 +35,7 @@ export type ServerMessage =
   | { type: 'MATCH_FOUND'; payload: { roomId: string; opponentName: string; opponentAvatar: string; opponentRating: number } }
   | { type: 'CUSTOM_ROOM_STATE'; payload: CustomRoomLobbyState }
   | { type: 'GAME_STATE'; payload: GameState }
-  | { type: 'ACTION_REJECTED'; payload: { reason: string; actionType?: string } }
-  | { type: 'ACTION_CONFIRMED'; payload: { actionType: string; timestamp: number } }
+  | { type: 'ACTION_REJECTED'; payload: { reason: string; actionType?: string; actionId?: string; currentState?: GameState } }
+  | { type: 'ACTION_CONFIRMED'; payload: { actionType: string; timestamp: number; actionId?: string; stateVersion?: number } }
   | { type: 'PONG'; payload: { timestamp: number } }
   | { type: 'ERROR'; payload: { message: string; code?: string } };

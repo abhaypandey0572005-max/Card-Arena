@@ -109,22 +109,39 @@ export class RoomManager {
     roomId: string,
     playerId: string,
     action: PlayerActionPayload
-  ): Promise<{ success: boolean; error?: string }> {
+  ): Promise<{ success: boolean; error?: string; versionMismatch?: boolean; stateVersion?: number }> {
     const room = this.rooms.get(roomId);
     if (!room) return { success: false, error: 'Room not found' };
 
     return new Promise((resolve) => {
       room.actionQueue = room.actionQueue.then(async () => {
         try {
+          // Optimistic Concurrency Control (OCC) Check
+          if (
+            action.expectedVersion !== undefined &&
+            action.expectedVersion !== room.state.stateVersion
+          ) {
+            resolve({
+              success: false,
+              error: `State version mismatch: Server is at v${room.state.stateVersion}, client sent v${action.expectedVersion}`,
+              versionMismatch: true,
+              stateVersion: room.state.stateVersion,
+            });
+            return;
+          }
+
           const result = this.applyAction(room, playerId, action);
           if (result.success) {
+            room.state.stateVersion += 1;
             room.broadcast(cloneGameState(room.state));
             if (room.state.phase === 'ended') {
               if (room.timerInterval) clearInterval(room.timerInterval);
               room.onGameOver(room.roomId, room.state.winnerId);
             }
+            resolve({ success: true, stateVersion: room.state.stateVersion });
+          } else {
+            resolve(result);
           }
-          resolve(result);
         } catch (err: unknown) {
           const errorMsg = err instanceof Error ? err.message : 'Action execution failed';
           resolve({ success: false, error: errorMsg });
@@ -160,6 +177,9 @@ export class RoomManager {
 
       case 'SURRENDER':
         return executeSurrender(state, playerId);
+
+      case 'EMOTE':
+        return { success: true };
 
       default:
         return { success: false, error: 'Unknown action type' };
@@ -255,5 +275,13 @@ export class RoomManager {
       if (room.p2SocketId) this.socketToRoom.delete(room.p2SocketId);
       this.rooms.delete(roomId);
     }
+  }
+
+  public getActiveRoomCount(): number {
+    return this.rooms.size;
+  }
+
+  public getAllRoomIds(): string[] {
+    return Array.from(this.rooms.keys());
   }
 }

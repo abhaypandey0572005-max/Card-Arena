@@ -44,6 +44,7 @@ export interface CombatLogEntry {
 
 export interface GameState {
   roomId: string;
+  stateVersion: number;
   turn: number;
   turnStartTime: number;
   turnDurationSeconds: number;
@@ -86,10 +87,16 @@ export interface EmotePayload {
   emote: 'taunt' | 'salute' | 'oops' | 'gg' | 'thinking';
 }
 
-export type PlayerActionPayload =
+export type PlayerActionBase = {
+  actionId?: string;
+  expectedVersion?: number;
+};
+
+export type PlayerActionPayload = PlayerActionBase & (
   | { type: 'PLAY_CARD'; payload: PlayCardPayload }
   | { type: 'ATTACK_MINION'; payload: AttackMinionPayload }
   | { type: 'ATTACK_HERO'; payload: AttackHeroPayload }
   | { type: 'END_TURN'; payload?: Record<string, never> }
   | { type: 'SURRENDER'; payload?: Record<string, never> }
-  | { type: 'EMOTE'; payload: EmotePayload };
+  | { type: 'EMOTE'; payload: EmotePayload }
+);

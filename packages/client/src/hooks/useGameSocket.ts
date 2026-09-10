@@ -13,6 +13,8 @@ export interface QueueState {
   timeInQueue: number;
 }
 
+const generateActionId = () => `act_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+
 export function useGameSocket() {
   const [isConnected, setIsConnected] = useState(false);
   const [queueState, setQueueState] = useState<QueueState>({ inQueue: false, timeInQueue: 0 });
@@ -20,10 +22,12 @@ export function useGameSocket() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
   const [myPlayerId, setMyPlayerId] = useState<string | null>(null);
+  const [latency, setLatency] = useState<number | null>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
   const pingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const queueTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastPingTimeRef = useRef<number>(0);
 
   // Send message helper
   const sendMessage = useCallback((msg: ClientMessage) => {
@@ -60,8 +64,9 @@ export function useGameSocket() {
       setIsConnected(true);
       setLastError(null);
 
-      // Start ping interval
+      // Start ping interval with RTT measurement
       pingIntervalRef.current = setInterval(() => {
+        lastPingTimeRef.current = Date.now();
         sendMessage({ type: 'PING' });
       }, 10000);
     };
@@ -92,9 +97,20 @@ export function useGameSocket() {
             setGameState(msg.payload);
             break;
 
+          case 'ACTION_CONFIRMED':
+            // Action validated by authoritative engine and written to Redis
+            break;
+
           case 'ACTION_REJECTED':
             setLastError(msg.payload.reason);
             setTimeout(() => setLastError(null), 3500);
+
+            // Immediate state resync if server provided fresh authoritative state
+            if (msg.payload.currentState) {
+              setGameState(msg.payload.currentState);
+            } else if (gameState?.roomId) {
+              sendMessage({ type: 'SYNC_STATE', payload: { roomId: gameState.roomId } });
+            }
             break;
 
           case 'ERROR':
@@ -103,6 +119,9 @@ export function useGameSocket() {
             break;
 
           case 'PONG':
+            if (lastPingTimeRef.current > 0) {
+              setLatency(Date.now() - lastPingTimeRef.current);
+            }
             break;
         }
       } catch (err) {
@@ -125,7 +144,7 @@ export function useGameSocket() {
       if (queueTimerRef.current) clearInterval(queueTimerRef.current);
       ws.close();
     };
-  }, [sendMessage]);
+  }, [sendMessage, gameState?.roomId]);
 
   // Queue timer ticker
   useEffect(() => {
@@ -193,13 +212,18 @@ export function useGameSocket() {
     });
   }, [sendMessage]);
 
-  // Game actions
+  // Game actions with Action Idempotency & Optimistic Concurrency Control (OCC)
   const sendGameAction = useCallback((action: PlayerActionPayload) => {
+    const actionWithId: PlayerActionPayload = {
+      ...action,
+      actionId: action.actionId || generateActionId(),
+      expectedVersion: gameState?.stateVersion,
+    };
     sendMessage({
       type: 'GAME_ACTION',
-      payload: action,
+      payload: actionWithId,
     });
-  }, [sendMessage]);
+  }, [sendMessage, gameState?.stateVersion]);
 
   const playCard = useCallback((cardInstanceId: string, targetInstanceId?: string) => {
     sendGameAction({
@@ -230,6 +254,12 @@ export function useGameSocket() {
     sendGameAction({ type: 'SURRENDER', payload: {} });
   }, [sendGameAction]);
 
+  const syncState = useCallback(() => {
+    if (gameState?.roomId) {
+      sendMessage({ type: 'SYNC_STATE', payload: { roomId: gameState.roomId } });
+    }
+  }, [sendMessage, gameState?.roomId]);
+
   const resetMatchState = useCallback(() => {
     setGameState(null);
     setCustomLobbyState(null);
@@ -242,6 +272,7 @@ export function useGameSocket() {
     gameState,
     lastError,
     myPlayerId,
+    latency,
     setMyPlayerId,
     joinQueue,
     leaveQueue,
@@ -255,6 +286,7 @@ export function useGameSocket() {
     attackHero,
     endTurn,
     surrender,
+    syncState,
     resetMatchState,
   };
 }
